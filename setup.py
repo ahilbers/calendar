@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import pathlib
 from setuptools import setup
 
 setup(
@@ -8,4 +9,5 @@ setup(
     author="Adriaan Hilbers",
     author_email="a.hilbers@icloud.com",
     packages=[],
+    install_requires=pathlib.Path("requirements.txt").read_text().strip().split("\n"),
 )
