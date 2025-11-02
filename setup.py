@@ -4,10 +4,10 @@ import pathlib
 from setuptools import setup
 
 setup(
-    name="calendar",
+    name="schedules",
     version="0.0",
     author="Adriaan Hilbers",
     author_email="a.hilbers@icloud.com",
-    packages=[],
+    packages=["schedules"],
     install_requires=pathlib.Path("requirements.txt").read_text().strip().split("\n"),
 )
