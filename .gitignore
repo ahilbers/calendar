@@ -1,6 +1,12 @@
-data/*
-*.egg-info
-.DS_Store  # Mac finder file
+# Host filesystem
+.DS_Store
 
+# Packages
+*.egg-info
+
+# Binaries and caches
 */__pycache__
 __pycache__
+
+# Directories
+data/*
