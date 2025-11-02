@@ -1,2 +1,3 @@
 data/*
 *.egg-info
+.DS_Store  # Mac finder file
