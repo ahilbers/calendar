@@ -1,6 +1,7 @@
-"""Calendar objects."""
+"""Base objects used in calendars."""
 
 import dataclasses
+import datetime as dt
 import enum
 
 
@@ -27,9 +28,25 @@ class Location:
     country: Country
     city: StrID
 
+    def __repr__(self):
+        return f"{self.country.value}:{self.city.upper()}"
+
 
 @dataclasses.dataclass(frozen=True)
 class Person:
-    first_name: StrID
     last_name: StrID
+    first_name: StrID
     home_location: Location
+
+
+@dataclasses.dataclass(frozen=True)
+class Trip:
+    location: Location
+    start_date: dt.date
+    end_date: dt.date
+
+
+@dataclasses.dataclass(frozen=True)
+class DayLocation:
+    start: Location
+    end: Location
