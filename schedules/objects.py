@@ -36,7 +36,7 @@ class Location:
 class Person:
     last_name: StrID
     first_name: StrID
-    home_location: Location
+    home: Location
 
 
 @dataclasses.dataclass(frozen=True)
@@ -47,6 +47,6 @@ class Trip:
 
 
 @dataclasses.dataclass(frozen=True)
-class DayLocation:
+class Day:
     start: Location
     end: Location
