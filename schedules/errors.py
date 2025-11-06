@@ -1,0 +1,2 @@
+class TripNotValidError(ValueError):
+    pass
