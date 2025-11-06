@@ -45,6 +45,10 @@ class Trip:
     start_date: dt.date
     end_date: dt.date
 
+    def __post_init__(self):
+        if not self.start_date < self.end_date:
+            raise ValueError(f"Trip start date must be before end date: {self.start_date}, {self.end_date}")
+
 
 @dataclasses.dataclass(frozen=True)
 class Day:

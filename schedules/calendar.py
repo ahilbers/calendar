@@ -1,28 +1,47 @@
 """The calendar, which holds one person's schedule."""
 
-import dataclasses
 import datetime as dt
+import logging
+from typing import Set
 
-from schedules.objects import Day, Person, Trip
+from schedules.errors import TripNotValidError
+from schedules.objects import Day, Location, Person, Trip
 
 
-@dataclasses.dataclass
 class Calendar:
-    """A single person's schedule."""
+    """A single person's calendar."""
 
-    person: Person
-    trips: set[Trip]
+    def __init__(self, person: Person) -> None:
+        self.person: Person = person
+        self._home: Location = person.home
+        self._trips: Set[Trip] = set()
+        logging.info("Created calendar for %s", self.person)
 
-    def __post_init__(self):
-        self._home = self.person.home
-        self._travel_days = self._get_travel_days()
+    def _raise_if_invalid_trip(self, candidate: Trip) -> None:
+        """Check candidate new trip against existing trips and raise if it is invalid."""
+        for existing in self._trips:
+            if candidate.start_date == existing.start_date:
+                raise TripNotValidError(f"Candidate {candidate} has same start date as {existing}.")
+            if candidate.end_date == existing.end_date:
+                raise TripNotValidError(f"Candidate {candidate} has same end date as {existing}.")
+            if candidate.start_date < existing.start_date and candidate.end_date > existing.start_date:
+                raise TripNotValidError(f"Candidate {candidate} falls partially in {existing}.")
+            if candidate.start_date < existing.end_date and candidate.end_date > existing.end_date:
+                raise TripNotValidError(f"Candidate {candidate} falls partially in {existing}.")
+
+    def add_trip(self, trip: Trip) -> None:
+        try:
+            self._raise_if_invalid_trip(candidate=trip)
+            self._trips.add(trip)
+        except TripNotValidError as err:
+            logging.exception("Failed to add trip: %", err)
 
     def _get_travel_days(self) -> dict[dt.date, Day]:
         """Construct a daily calendar starting on the day of the first trip and ending in the day of the last trip."""
-        if not self.trips:
+        if not self._trips:
             return dict()
 
-        trips_ordered = sorted(self.trips, key=lambda trip: (trip.start_date, trip.end_date))
+        trips_ordered = sorted(self._trips, key=lambda trip: (trip.start_date, trip.end_date))
         travel_days: dict[dt.date, Day] = {}
 
         for trip in trips_ordered:
@@ -37,10 +56,11 @@ class Calendar:
         daily_calendar: dict[dt.date, Day] = {}
 
         # Determine where person starts and ends each day
+        travel_days = self._get_travel_days()
         for day in (start_date + dt.timedelta(days=i) for i in range(num_days)):
-            if not self._travel_days or day < min(self._travel_days) or day > max(self._travel_days):
+            if not travel_days or day < min(travel_days) or day > max(travel_days):
                 daily_calendar[day] = Day(start=self._home, end=self._home)
-            elif day in self._travel_days:
-                daily_calendar[day] = self._travel_days[day]
+            elif day in travel_days:
+                daily_calendar[day] = travel_days[day]
 
         return daily_calendar
