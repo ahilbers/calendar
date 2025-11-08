@@ -1,4 +1,5 @@
 import datetime as dt
+import re
 
 import pytest
 
@@ -16,6 +17,71 @@ def sample_person() -> Person:
         first_name=StrID("firstname"),
         home=sample_home_location(),
     )
+
+
+class TestAddTrips:
+    """Tests for calendar.add_trip."""
+
+    @pytest.fixture(autouse=True)
+    def set_up(self):
+        self.calendar = Calendar(sample_person())
+
+    def test_no_trips(self):
+        assert not self.calendar.trip_list
+
+    def test_single_trip(self):
+        trip = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 24))
+        self.calendar.add_trip(trip)
+        assert self.calendar.trip_list == [trip]
+
+    def test_trips_returned_ordered(self):
+        trip_later = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 25), dt.date(2024, 6, 26))
+        trip_earlier = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 24))
+
+        self.calendar.add_trip(trip_later)
+        self.calendar.add_trip(trip_earlier)
+
+        assert self.calendar.trip_list == [trip_earlier, trip_later]
+
+    def test_fail_if_same_start_date(self, caplog: pytest.LogCaptureFixture):
+        trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 24))
+        trip_2 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 25))
+
+        self.calendar.add_trip(trip_1)
+        self.calendar.add_trip(trip_2)
+
+        assert re.match("^.*Failed to add trip.*has same start date", caplog.text)
+        assert self.calendar.trip_list == [trip_1]
+
+    def test_fail_if_same_end_date(self, caplog: pytest.LogCaptureFixture):
+        trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 24))
+        trip_2 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 22), dt.date(2024, 6, 24))
+
+        self.calendar.add_trip(trip_1)
+        self.calendar.add_trip(trip_2)
+
+        assert re.match("^.*Failed to add trip.*has same end date", caplog.text)
+        assert self.calendar.trip_list == [trip_1]
+
+    def test_fail_if_overlapping_and_starting_earlier(self, caplog: pytest.LogCaptureFixture):
+        trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 25))
+        trip_2 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 22), dt.date(2024, 6, 24))
+
+        self.calendar.add_trip(trip_1)
+        self.calendar.add_trip(trip_2)
+
+        assert re.match("^.*Failed to add trip.*falls partially in", caplog.text)
+        assert self.calendar.trip_list == [trip_1]
+
+    def test_fail_if_overlapping_and_starting_later(self, caplog: pytest.LogCaptureFixture):
+        trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 25))
+        trip_2 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 24), dt.date(2024, 6, 26))
+
+        self.calendar.add_trip(trip_1)
+        self.calendar.add_trip(trip_2)
+
+        assert re.match("^.*Failed to add trip.*falls partially in", caplog.text)
+        assert self.calendar.trip_list == [trip_1]
 
 
 class TestDailyCalendar:
@@ -40,11 +106,7 @@ class TestDailyCalendar:
         """A single trip inside the calendar should be calculated properly."""
 
         person = sample_person()
-        trip = Trip(
-            location=Location(country=Country.NETHERLANDS, city=StrID("Zurich")),
-            start_date=dt.date(2024, 6, 23),
-            end_date=dt.date(2024, 6, 24),
-        )
+        trip = Trip(Location(Country.NETHERLANDS, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 24))
         calendar = Calendar(person)
         calendar.add_trip(trip)
 
@@ -61,16 +123,8 @@ class TestDailyCalendar:
     def test_multiple_trips_disjoint(self):
 
         person = sample_person()
-        trip_1 = Trip(
-            location=Location(country=Country.NETHERLANDS, city=StrID("Zurich")),
-            start_date=dt.date(2024, 6, 23),
-            end_date=dt.date(2024, 6, 24),
-        )
-        trip_2 = Trip(
-            location=Location(country=Country.UNITED_KINGDOM, city=StrID("London")),
-            start_date=dt.date(2024, 6, 25),
-            end_date=dt.date(2024, 6, 26),
-        )
+        trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 24))
+        trip_2 = Trip(Location(Country.UNITED_KINGDOM, StrID("London")), dt.date(2024, 6, 25), dt.date(2024, 6, 26))
         calendar = Calendar(person)
         calendar.add_trip(trip_1)
         calendar.add_trip(trip_2)
