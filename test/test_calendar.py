@@ -4,6 +4,7 @@ import re
 import pytest
 
 from schedules.calendar import Calendar
+from schedules.errors import TripNotValidError
 from schedules.objects import Country, Day, Location, Person, StrID, Trip
 
 
@@ -46,51 +47,37 @@ class TestAddTrips:
     def test_fail_if_same_start_date(self, caplog: pytest.LogCaptureFixture):
         trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 24))
         trip_2 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 25))
-
         self.calendar.add_trip(trip_1)
-        self.calendar.add_trip(trip_2)
-
-        assert re.match("^.*Failed to add trip.*has same start date", caplog.text)
-        assert self.calendar.trip_list == [trip_1]
+        with pytest.raises(TripNotValidError):
+            self.calendar.add_trip(trip_2)
 
     def test_fail_if_same_end_date(self, caplog: pytest.LogCaptureFixture):
         trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 24))
         trip_2 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 22), dt.date(2024, 6, 24))
-
         self.calendar.add_trip(trip_1)
-        self.calendar.add_trip(trip_2)
-
-        assert re.match("^.*Failed to add trip.*has same end date", caplog.text)
-        assert self.calendar.trip_list == [trip_1]
+        with pytest.raises(TripNotValidError):
+            self.calendar.add_trip(trip_2)
 
     def test_fail_if_overlapping_and_starting_earlier(self, caplog: pytest.LogCaptureFixture):
         trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 25))
         trip_2 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 22), dt.date(2024, 6, 24))
-
         self.calendar.add_trip(trip_1)
-        self.calendar.add_trip(trip_2)
-
-        assert re.match("^.*Failed to add trip.*falls partially in", caplog.text)
-        assert self.calendar.trip_list == [trip_1]
+        with pytest.raises(TripNotValidError):
+            self.calendar.add_trip(trip_2)
 
     def test_fail_if_overlapping_and_starting_later(self, caplog: pytest.LogCaptureFixture):
         trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 25))
         trip_2 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 24), dt.date(2024, 6, 26))
-
         self.calendar.add_trip(trip_1)
-        self.calendar.add_trip(trip_2)
-
-        assert re.match("^.*Failed to add trip.*falls partially in", caplog.text)
-        assert self.calendar.trip_list == [trip_1]
+        with pytest.raises(TripNotValidError):
+            self.calendar.add_trip(trip_2)
 
     def test_trip_fully_contained(self):
         """A trip that is fully contained in another should be added without issues."""
         trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 22), dt.date(2024, 6, 25))
         trip_2 = Trip(Location(Country.UNITED_KINGDOM, StrID("London")), dt.date(2024, 6, 23), dt.date(2024, 6, 24))
-
         self.calendar.add_trip(trip_1)
         self.calendar.add_trip(trip_2)
-
         assert self.calendar.trip_list == [trip_1, trip_2]
 
 
