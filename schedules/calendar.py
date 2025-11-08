@@ -108,5 +108,9 @@ class Calendar:
                 daily_calendar[day] = Day(start=self._home, end=self._home)
             elif day in travel_days:
                 daily_calendar[day] = travel_days[day]
+            else:
+                last_travel_day = max(date for date in travel_days.keys() if date < day)
+                last_travel_end = travel_days[last_travel_day].end
+                daily_calendar[day] = Day(start=last_travel_end, end=last_travel_end)
 
         return daily_calendar
