@@ -15,12 +15,17 @@ class Calendar:
         self.person: Person = person
         self._home: Location = person.home
         self._trips: Set[Trip] = set()
+        self._trip_list_cache: list[Trip] | None = None  # Cache sorted list, cleared whenever new trip is added
         logging.info("Created calendar for %s", self.person)
+
+    def __repr__(self):
+        return f"Calendar({self.person})"
 
     def _raise_if_invalid_trip(self, candidate: Trip) -> None:
         """Check candidate new trip against existing trips and raise if it is invalid."""
         for existing in self._trips:
             if candidate.start_date == existing.start_date:
+                print(0)
                 raise TripNotValidError(f"Candidate {candidate} has same start date as {existing}.")
             if candidate.end_date == existing.end_date:
                 raise TripNotValidError(f"Candidate {candidate} has same end date as {existing}.")
@@ -29,24 +34,65 @@ class Calendar:
             if candidate.start_date < existing.end_date and candidate.end_date > existing.end_date:
                 raise TripNotValidError(f"Candidate {candidate} falls partially in {existing}.")
 
+    @property
+    def trip_list(self) -> list[Trip]:
+        """Get list of trips, in order from earliest to latest."""
+        if self._trip_list_cache is None:
+            self._trip_list_cache = sorted(self._trips, key=lambda trip: (trip.start_date, trip.end_date))
+        return self._trip_list_cache
+
     def add_trip(self, trip: Trip) -> None:
+        self._trip_list_cache = None  # Clear cache whenever new trip is added, needs to be recalculated
         try:
             self._raise_if_invalid_trip(candidate=trip)
+            logging.info("Adding trip %s to calendar %s", trip, self)
             self._trips.add(trip)
         except TripNotValidError as err:
-            logging.exception("Failed to add trip: %", err)
+            logging.exception("Failed to add trip: %s", err)
+
+    def _get_travel_start_of_trip(self, trip_idx: int) -> Day:
+        trip = self.trip_list[trip_idx]
+
+        # If first trip, start at home
+        if trip == self.trip_list[0]:
+            return Day(start=self._home, end=trip.location)
+
+        # If trip starts on or before last day of previous trip, travel straight
+        previous_trip = self.trip_list[trip_idx - 1]
+        if trip.start_date <= previous_trip.end_date:
+            return Day(start=previous_trip.location, end=trip.location)
+
+        # Else travel from home
+        return Day(start=self._home, end=trip.location)
+
+    def _get_travel_end_of_trip(self, trip_idx: int) -> Day:
+        trip = self.trip_list[trip_idx]
+
+        # If trip ends before last day of previous trip, travel back there
+        if trip != self.trip_list[0] and trip.end_date < (previous_trip := self.trip_list[trip_idx - 1]).end_date:
+            return Day(start=trip.location, end=previous_trip.location)
+
+        # If last trip, end at home
+        if trip == self.trip_list[-1]:
+            return Day(start=trip.location, end=self._home)
+
+        # If trip ends on first day of next trip, travel straight
+        next_trip = self.trip_list[trip_idx + 1]
+        if trip.end_date == next_trip.start_date:
+            return Day(start=trip.location, end=next_trip.location)
+
+        # Else travel to home
+        return Day(start=trip.location, end=self._home)
 
     def _get_travel_days(self) -> dict[dt.date, Day]:
-        """Construct a daily calendar starting on the day of the first trip and ending in the day of the last trip."""
+        """Determine the days at which travel occurs."""
         if not self._trips:
             return dict()
 
-        trips_ordered = sorted(self._trips, key=lambda trip: (trip.start_date, trip.end_date))
         travel_days: dict[dt.date, Day] = {}
-
-        for trip in trips_ordered:
-            travel_days[trip.start_date] = Day(start=self._home, end=trip.location)
-            travel_days[trip.end_date] = Day(start=trip.location, end=self._home)
+        for trip_idx, trip in enumerate(self.trip_list):
+            travel_days[trip.start_date] = self._get_travel_start_of_trip(trip_idx)
+            travel_days[trip.end_date] = self._get_travel_end_of_trip(trip_idx)
 
         return travel_days
 
@@ -62,5 +108,9 @@ class Calendar:
                 daily_calendar[day] = Day(start=self._home, end=self._home)
             elif day in travel_days:
                 daily_calendar[day] = travel_days[day]
+            else:
+                last_travel_day = max(date for date in travel_days.keys() if date < day)
+                last_travel_end = travel_days[last_travel_day].end
+                daily_calendar[day] = Day(start=last_travel_end, end=last_travel_end)
 
         return daily_calendar
