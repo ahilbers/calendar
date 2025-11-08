@@ -83,6 +83,16 @@ class TestAddTrips:
         assert re.match("^.*Failed to add trip.*falls partially in", caplog.text)
         assert self.calendar.trip_list == [trip_1]
 
+    def test_trip_fully_contained(self):
+        """A trip that is fully contained in another should be added without issues."""
+        trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 22), dt.date(2024, 6, 25))
+        trip_2 = Trip(Location(Country.UNITED_KINGDOM, StrID("London")), dt.date(2024, 6, 23), dt.date(2024, 6, 24))
+
+        self.calendar.add_trip(trip_1)
+        self.calendar.add_trip(trip_2)
+
+        assert self.calendar.trip_list == [trip_1, trip_2]
+
 
 class TestDailyCalendar:
     """Tests for calendar.get_daily_calendar."""
