@@ -43,12 +43,9 @@ class Calendar:
 
     def add_trip(self, trip: Trip) -> None:
         self._trip_list_cache = None  # Clear cache whenever new trip is added, needs to be recalculated
-        try:
-            self._raise_if_invalid_trip(candidate=trip)
-            logging.info("Adding trip %s to calendar %s", trip, self)
-            self._trips.add(trip)
-        except TripNotValidError as err:
-            logging.exception("Failed to add trip: %s", err)
+        self._raise_if_invalid_trip(candidate=trip)
+        logging.info("Adding trip %s to calendar %s", trip, self)
+        self._trips.add(trip)
 
     def _get_travel_start_of_trip(self, trip_idx: int) -> Day:
         trip = self.trip_list[trip_idx]
