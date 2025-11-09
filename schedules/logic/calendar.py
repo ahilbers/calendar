@@ -4,8 +4,8 @@ import datetime as dt
 import logging
 from typing import Set
 
-from schedules.errors import TripNotValidError
-from schedules.objects import Day, Location, Person, Trip
+from schedules.logic.errors import TripNotValidError
+from schedules.logic.objects import Day, Location, Person, Trip
 
 
 class Calendar:

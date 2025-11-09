@@ -1,4 +1,4 @@
-from schedules.objects import StrID
+from schedules.logic.objects import StrID
 
 
 class TestStrID:

@@ -2,9 +2,9 @@ import datetime as dt
 
 import pytest
 
-from schedules.calendar import Calendar
-from schedules.errors import TripNotValidError
-from schedules.objects import Country, Day, Location, Person, StrID, Trip
+from schedules.logic.calendar import Calendar
+from schedules.logic.errors import TripNotValidError
+from schedules.logic.objects import Country, Day, Location, Person, StrID, Trip
 
 
 def sample_home_location() -> Location:
