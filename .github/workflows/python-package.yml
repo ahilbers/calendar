@@ -13,6 +13,8 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    env:
+      FLASK_KEY: "mynonsecretkey"
     strategy:
       fail-fast: false
       matrix:
@@ -20,8 +22,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Set environment variables
-      run: echo "GITHUB_WORKFLOW_FAKE_FLASK_KEY" >> $env:FLASK_KEY
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
