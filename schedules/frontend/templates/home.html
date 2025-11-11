@@ -6,11 +6,21 @@
     <title>Document</title>
     <style>
         body {
-            font-family: 'Trebuchet MS', Arial, Helvetica, sans-serif;
+            font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
         }
     </style>
 </head>
 <body>
     <h1>Friend Calendar</h1>
+    <button id="show-calendars">Show Calendars</button>
+    <div id="calendars-container"></div>
+    <script>
+        document
+        .getElementById("show-calendars")
+        .addEventListener(
+            "click", 
+            () => document.getElementById("calendars-container").textContent = "Calendars Appear Here"
+        )
+    </script>
 </body>
 </html>
