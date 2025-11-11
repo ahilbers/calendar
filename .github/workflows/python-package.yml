@@ -21,7 +21,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Set environment variables
-      run: echo "GITHUB_WORKFLOW_FAKE_FLASK_KEY" >> $FLASK_KEY
+      run: echo "GITHUB_WORKFLOW_FAKE_FLASK_KEY" >> $env:FLASK_KEY
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
