@@ -12,15 +12,21 @@
 </head>
 <body>
     <h1>Friend Calendar</h1>
-    <button id="show-calendars">Show Calendars</button>
-    <div id="calendars-container"></div>
-    <script>
-        document
-        .getElementById("show-calendars")
-        .addEventListener(
-            "click", 
-            () => document.getElementById("calendars-container").textContent = "Calendars Appear Here"
-        )
-    </script>
+
+    <!-- Form to add a person -->
+    <div>
+        <h2>Add Person</h2>
+        <form method="post">
+            <label style="display:block; margin-bottom:10px;">
+                Last Name:
+                <input name="last_name" type="text">
+            </label>
+            <label style="display:block; margin-bottom:10px">
+                First Name:
+                <input name="first_name" type="text">
+            </label>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
 </body>
 </html>
