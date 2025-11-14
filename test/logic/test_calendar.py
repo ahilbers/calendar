@@ -2,8 +2,8 @@ import datetime as dt
 
 import pytest
 
-from schedules.logic.calendar import Calendar
-from schedules.logic.errors import TripNotValidError
+from schedules.logic.calendar import Calendar, SinglePersonCalendar
+from schedules.logic.errors import CalendarError, TripNotValidError
 from schedules.logic.objects import Country, Day, Location, Person, StrID, Trip
 
 
@@ -20,11 +20,11 @@ def sample_person() -> Person:
 
 
 class TestAddTrips:
-    """Tests for calendar.add_trip."""
+    """Tests for SinglePersonCalendar.add_trip."""
 
     @pytest.fixture(autouse=True)
     def set_up(self):
-        self.calendar = Calendar(sample_person())
+        self.calendar = SinglePersonCalendar(sample_person())
 
     def test_no_trips(self):
         assert not self.calendar.trip_list
@@ -81,11 +81,11 @@ class TestAddTrips:
 
 
 class TestDailyCalendar:
-    """Tests for calendar.get_daily_calendar."""
+    """Tests for SinglePersonCalendar.get_daily_calendar."""
 
     @pytest.fixture(autouse=True)
     def set_up(self):
-        self.calendar = Calendar(sample_person())
+        self.calendar = SinglePersonCalendar(sample_person())
 
     def test_no_trips(self):
         """Without any trips, the daily calendar should be starting and ending each day in the home location."""
@@ -177,3 +177,20 @@ class TestDailyCalendar:
             dt.date(2024, 6, 28): Day(start=trip_1.location, end=self.calendar.person.home),
         }
         assert daily_calendar_actual == daily_calendar_expected
+
+
+class TestCalendar:
+    """Tests for Calendar."""
+
+    def test_add_person(self):
+        calendar = Calendar()
+        person = sample_person()
+        calendar.add_person(person)
+        assert calendar.calendars[person].trip_list == []
+
+    def test_fails_if_adding_person_twice(self):
+        calendar = Calendar()
+        person, person_duplicate = sample_person(), sample_person()
+        calendar.add_person(person)
+        with pytest.raises(CalendarError):
+            calendar.add_person(person_duplicate)
