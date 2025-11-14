@@ -2,13 +2,13 @@
 
 import datetime as dt
 import logging
-from typing import Set
+from typing import MutableMapping, Set
 
-from schedules.logic.errors import TripNotValidError
+from schedules.logic.errors import CalendarError, TripNotValidError
 from schedules.logic.objects import Day, Location, Person, Trip
 
 
-class Calendar:
+class SinglePersonCalendar:
     """A single person's calendar."""
 
     def __init__(self, person: Person) -> None:
@@ -19,7 +19,7 @@ class Calendar:
         logging.info("Created calendar for %s", self.person)
 
     def __repr__(self):
-        return f"Calendar({self.person})"
+        return f"SinglePersonCalendar({self.person})"
 
     def _raise_if_invalid_trip(self, candidate: Trip) -> None:
         """Check candidate new trip against existing trips and raise if it is invalid."""
@@ -111,3 +111,19 @@ class Calendar:
                 daily_calendar[day] = Day(start=last_travel_end, end=last_travel_end)
 
         return daily_calendar
+
+
+class Calendar:
+    """A full calendar, with multiple people."""
+
+    def __init__(self) -> None:
+        self.calendars: MutableMapping[Person, SinglePersonCalendar] = dict()
+
+    def __repr__(self) -> str:
+        return f"Calendar({','.join(sorted(str(person) for person in self.calendars.keys()))})"
+
+    def add_person(self, person: Person) -> None:
+        if person in self.calendars.keys():
+            raise CalendarError(f"Person {person} is already in calendar.")
+        self.calendars[person] = SinglePersonCalendar(person)
+        logging.info("Added %s to calendar", person)
