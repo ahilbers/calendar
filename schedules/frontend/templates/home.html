@@ -13,17 +13,29 @@
 <body>
     <h1>Friend Calendar</h1>
 
-    <!-- Form to add a person -->
+    {# Button: Display Calendar #}
+    <div>
+    <h2>View Calendar</h2>
+    <button id="show-calendar">Show Calendar</button>
+    <div id="calendar-container"></div>
+    <script>
+        const calendar_view = "Placeholder for calendar"
+        document.getElementById("show-calendar").addEventListener("click", () => {
+            document.getElementById("calendar-container").textContent = calendar_view
+        })
+    </script>
+    </div>
+
+    {# Form: Add person #}
     <div>
         <h2>Add Person</h2>
         <form method="post">
+            <input type="hidden" name="request_id" value="add_person">
             <label style="display:block; margin-bottom:10px;">
-                Last Name:
-                <input name="last_name" type="text">
+                Last Name: <input type="text" name="last_name">
             </label>
             <label style="display:block; margin-bottom:10px">
-                First Name:
-                <input name="first_name" type="text">
+                First Name: <input type="text" name="first_name">
             </label>
             <button type="submit">Submit</button>
         </form>

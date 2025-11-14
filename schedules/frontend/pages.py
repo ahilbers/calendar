@@ -9,5 +9,6 @@ pages = Blueprint("pages", __name__)
 def home() -> str:
     if request.method == "POST":
         data = dict(request.form)
-        print(data)
+        if request.form.get("request_id") == "add_person":
+            _ = data  # Placeholder: add person to calendar
     return render_template("home.html")
