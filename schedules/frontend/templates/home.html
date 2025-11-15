@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Friend Calendar</title>
     <style>
         body {
             font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
@@ -19,9 +19,11 @@
     <button id="show-calendar">Show Calendar</button>
     <div id="calendar-container"></div>
     <script>
-        const calendar_view = "Placeholder for calendar"
+
+        // Render and show the calendar
+        const calendarRender = {{ calendar_ | tojson }};
         document.getElementById("show-calendar").addEventListener("click", () => {
-            document.getElementById("calendar-container").textContent = calendar_view
+            document.getElementById("calendar-container").textContent = calendarRender
         })
     </script>
     </div>
