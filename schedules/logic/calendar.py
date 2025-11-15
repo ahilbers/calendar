@@ -1,11 +1,12 @@
 """The calendar, which holds one person's schedule."""
 
 import datetime as dt
-import logging
 from typing import MutableMapping, Set
 
+from schedules import logger
 from schedules.logic.errors import CalendarError, TripNotValidError
 from schedules.logic.objects import Day, Location, Person, Trip
+from schedules.frontend.requests import Request
 
 
 class SinglePersonCalendar:
@@ -16,7 +17,7 @@ class SinglePersonCalendar:
         self._home: Location = person.home
         self._trips: Set[Trip] = set()
         self._trip_list_cache: list[Trip] | None = None  # Cache sorted list, cleared whenever new trip is added
-        logging.info("Created calendar for %s", self.person)
+        logger.info("Created calendar for %s", self.person)
 
     def __repr__(self):
         return f"SinglePersonCalendar({self.person})"
@@ -44,7 +45,7 @@ class SinglePersonCalendar:
     def add_trip(self, trip: Trip) -> None:
         self._trip_list_cache = None  # Clear cache whenever new trip is added, needs to be recalculated
         self._raise_if_invalid_trip(candidate=trip)
-        logging.info("Adding trip %s to calendar %s", trip, self)
+        logger.info("Adding trip %s to calendar %s", trip, self)
         self._trips.add(trip)
 
     def _get_travel_start_of_trip(self, trip_idx: int) -> Day:
@@ -113,7 +114,7 @@ class SinglePersonCalendar:
         return daily_calendar
 
 
-class Calendar:
+class FullCalendar:
     """A full calendar, with multiple people."""
 
     def __init__(self) -> None:
@@ -122,8 +123,14 @@ class Calendar:
     def __repr__(self) -> str:
         return f"Calendar({','.join(sorted(str(person) for person in self.calendars.keys()))})"
 
-    def add_person(self, person: Person) -> None:
+    def _add_person(self, person: Person) -> None:
         if person in self.calendars.keys():
             raise CalendarError(f"Person {person} is already in calendar.")
         self.calendars[person] = SinglePersonCalendar(person)
-        logging.info("Added %s to calendar", person)
+        logger.info("Added %s to calendar", person)
+
+    def process_request(self, request: Request) -> None:
+        print("This is where I will process a request!")
+
+    def render(self) -> str:
+        return "TODO: RENDER CALENDAR HERE"

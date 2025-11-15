@@ -2,7 +2,7 @@ import datetime as dt
 
 import pytest
 
-from schedules.logic.calendar import Calendar, SinglePersonCalendar
+from schedules.logic.calendar import FullCalendar, SinglePersonCalendar
 from schedules.logic.errors import CalendarError, TripNotValidError
 from schedules.logic.objects import Country, Day, Location, Person, StrID, Trip
 
@@ -183,13 +183,13 @@ class TestCalendar:
     """Tests for Calendar."""
 
     def test_add_person(self):
-        calendar = Calendar()
+        calendar = FullCalendar()
         person = sample_person()
         calendar.add_person(person)
         assert calendar.calendars[person].trip_list == []
 
     def test_fails_if_adding_person_twice(self):
-        calendar = Calendar()
+        calendar = FullCalendar()
         person, person_duplicate = sample_person(), sample_person()
         calendar.add_person(person)
         with pytest.raises(CalendarError):
