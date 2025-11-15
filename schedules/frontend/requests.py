@@ -1,5 +1,6 @@
 """HTTP request utils."""
 
+from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any
 
@@ -10,6 +11,7 @@ class RequestType(StrEnum):
     ADD_PERSON = "ADD_PERSON"
 
 
+@dataclass(frozen=True)
 class Request:
     """Used to pass around requests between frontend and backend"""
 

@@ -1,12 +1,14 @@
 """The calendar, which holds one person's schedule."""
 
 import datetime as dt
+import logging
 from typing import MutableMapping, Set
 
-from schedules import logger
 from schedules.logic.errors import CalendarError, TripNotValidError
 from schedules.logic.objects import Day, Location, Person, Trip
 from schedules.frontend.requests import Request
+
+logger = logging.getLogger(__package__)
 
 
 class SinglePersonCalendar:
@@ -130,7 +132,7 @@ class FullCalendar:
         logger.info("Added %s to calendar", person)
 
     def process_request(self, request: Request) -> None:
-        print("This is where I will process a request!")
+        logger.info("Processing request %s", request)
 
     def render(self) -> str:
-        return "TODO: RENDER CALENDAR HERE"
+        return "TODO: Render Calendar Here"
