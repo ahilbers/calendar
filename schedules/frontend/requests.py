@@ -1,9 +1,9 @@
-"""Config for interaction between frontend and backend."""
+"""HTTP request utils."""
 
 from enum import StrEnum
 
 
-class Requests(StrEnum):
+class RequestType(StrEnum):
     """Request types (e.g. GET or POST) sent between frontend and backend"""
 
-    ADD_PERSON: str
+    ADD_PERSON = "ADD_PERSON"

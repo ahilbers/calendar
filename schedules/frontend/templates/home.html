@@ -19,11 +19,9 @@
     <button id="show-calendar">Show Calendar</button>
     <div id="calendar-container"></div>
     <script>
-
-        // Render and show the calendar
-        const calendarRender = {{ calendar_ | tojson }};
+        const calendar_render = {{ calendar | tojson }}
         document.getElementById("show-calendar").addEventListener("click", () => {
-            document.getElementById("calendar-container").textContent = calendarRender
+            document.getElementById("calendar-container").textContent = calendar_render
         })
     </script>
     </div>
@@ -32,7 +30,7 @@
     <div>
         <h2>Add Person</h2>
         <form method="post">
-            <input type="hidden" name="request_id" value="add_person">
+            <input type="hidden" name="request_id" value={{ request_lib.RequestType.ADD_PERSON }}>
             <label style="display:block; margin-bottom:10px;">
                 Last Name: <input type="text" name="last_name">
             </label>
