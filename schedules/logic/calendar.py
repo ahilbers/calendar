@@ -119,8 +119,11 @@ class FullCalendar:
     def __init__(self) -> None:
         self.calendars: MutableMapping[Person, SinglePersonCalendar] = dict()
 
+    def _people_list_string(self) -> str:
+        return ",\n".join(sorted(str(person) for person in self.calendars.keys()))
+
     def __repr__(self) -> str:
-        return f"FullCalendar({','.join(sorted(str(person) for person in self.calendars.keys()))})"
+        return f"FullCalendar({self._people_list_string()})"
 
     def _add_person(self, person: Person) -> None:
         if person in self.calendars.keys():
@@ -144,4 +147,4 @@ class FullCalendar:
 
     def render(self) -> str:
         logging.info("Rendering calendar.")
-        return f"TODO: Render Calendar Here."
+        return f"Calendar. People: {self._people_list_string()}."
