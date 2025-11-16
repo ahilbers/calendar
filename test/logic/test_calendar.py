@@ -3,7 +3,7 @@ import datetime as dt
 import pytest
 
 from schedules.logic.calendar import FullCalendar, SinglePersonCalendar
-from schedules.logic.errors import CalendarError, TripNotValidError
+from schedules.logic.errors import CalendarError
 from schedules.logic.objects import Country, Day, Location, Person, StrID, Trip
 
 
@@ -47,28 +47,28 @@ class TestAddTrips:
         trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 24))
         trip_2 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 25))
         self.calendar.add_trip(trip_1)
-        with pytest.raises(TripNotValidError):
+        with pytest.raises(CalendarError):
             self.calendar.add_trip(trip_2)
 
     def test_fail_if_same_end_date(self, caplog: pytest.LogCaptureFixture):
         trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 24))
         trip_2 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 22), dt.date(2024, 6, 24))
         self.calendar.add_trip(trip_1)
-        with pytest.raises(TripNotValidError):
+        with pytest.raises(CalendarError):
             self.calendar.add_trip(trip_2)
 
     def test_fail_if_overlapping_and_starting_earlier(self, caplog: pytest.LogCaptureFixture):
         trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 25))
         trip_2 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 22), dt.date(2024, 6, 24))
         self.calendar.add_trip(trip_1)
-        with pytest.raises(TripNotValidError):
+        with pytest.raises(CalendarError):
             self.calendar.add_trip(trip_2)
 
     def test_fail_if_overlapping_and_starting_later(self, caplog: pytest.LogCaptureFixture):
         trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 25))
         trip_2 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 24), dt.date(2024, 6, 26))
         self.calendar.add_trip(trip_1)
-        with pytest.raises(TripNotValidError):
+        with pytest.raises(CalendarError):
             self.calendar.add_trip(trip_2)
 
     def test_trip_fully_contained(self):
@@ -176,18 +176,18 @@ class TestDailyCalendar:
         assert daily_calendar_actual == daily_calendar_expected
 
 
-class TestCalendar:
+class TestFullCalendar:
     """Tests for Calendar."""
 
     def test_add_person(self):
         calendar = FullCalendar()
         person = sample_person()
-        calendar.add_person(person)
+        calendar._add_person(person)  # pyright: ignore[reportPrivateUsage]
         assert calendar.calendars[person].trip_list == []
 
     def test_fails_if_adding_person_twice(self):
         calendar = FullCalendar()
         person, person_duplicate = sample_person(), sample_person()
-        calendar.add_person(person)
+        calendar._add_person(person)  # pyright: ignore[reportPrivateUsage]
         with pytest.raises(CalendarError):
-            calendar.add_person(person_duplicate)
+            calendar._add_person(person_duplicate)  # pyright: ignore[reportPrivateUsage]

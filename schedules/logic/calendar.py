@@ -4,7 +4,7 @@ import datetime as dt
 import logging
 from typing import Any, MutableMapping, Set
 
-from schedules.frontend.requests import Request, RequestType
+from schedules.logic.requests import Request, RequestType
 from schedules.logic.errors import CalendarBaseException, CalendarError, RequestError
 from schedules.logic.objects import Day, Location, Person, Trip
 

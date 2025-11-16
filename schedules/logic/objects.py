@@ -5,7 +5,7 @@ import datetime as dt
 import enum
 from typing import Self
 
-from schedules.frontend.requests import Request
+from schedules.logic.requests import Request
 from schedules.logic.errors import RequestError
 
 
