@@ -16,11 +16,26 @@
     {# Calendar Memgers #}
     <div>
     <h2>Calendar Members</h2>
-    {{ calendar.render() | tojson }}
+    {# {{ calendar.single_person_calendars | tojson }} #}
+    <table>
+        <thead>
+            <tr> <th>Name</th> <th>Home</th> </tr>
+        </thead>
+        <tbody>
+            {% for single_person_calendar in calendar.single_person_calendars %}
+                <tr>
+                    <td> {{ single_person_calendar.person.display_name_frontend }} </td>
+                    <td> {{ single_person_calendar.person.home.display_name_frontend }} </td>
+                </tr>    
+            {% endfor %}
+        </tbody>
+    </table>
+    
+
     </div>
 
     {# Button: Display Calendar #}
-    <div>
+    {# <div>
     <h2>View Calendar</h2>
     <button id="show-calendar">Show Calendar</button>
     <div id="calendar-container"></div>
@@ -30,7 +45,7 @@
             document.getElementById("calendar-container").textContent = calendar_render
         })
     </script>
-    </div>
+    </div> #}
 
     {# Form: Add person #}
     <div>

@@ -119,12 +119,6 @@ class FullCalendar:
     def __init__(self) -> None:
         self.calendars: MutableMapping[Person, SinglePersonCalendar] = dict()
 
-    def _people_list_string(self) -> str:
-        return ",\n".join(sorted(str(person) for person in self.calendars.keys()))
-
-    def __repr__(self) -> str:
-        return f"FullCalendar({self._people_list_string()})"
-
     def _add_person(self, person: Person) -> None:
         if person in self.calendars.keys():
             raise CalendarError(f"Person {person} is already in calendar.")
@@ -145,6 +139,8 @@ class FullCalendar:
         else:
             return Response(code=400, message=f"Unknown request type: `{request.request_type}`.")
 
-    def render(self) -> str:
-        logging.info("Rendering calendar.")
-        return f"Calendar. People: {self._people_list_string()}."
+    @property
+    def single_person_calendars(self) -> list[SinglePersonCalendar]:
+        """Get list of single-person calendars, sorted by name."""
+        people_sorted = sorted(self.calendars.keys(), key=lambda person: (person.last_name, person.first_name))
+        return [self.calendars[person] for person in people_sorted]
