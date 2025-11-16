@@ -4,8 +4,8 @@ import datetime as dt
 import logging
 from typing import Any, MutableMapping, Set
 
-from schedules.logic.requests import Request, RequestType
-from schedules.logic.errors import CalendarBaseException, CalendarError, RequestError
+from schedules.logic.requests import Request, RequestType, Response
+from schedules.logic.errors import CalendarBaseException, CalendarError
 from schedules.logic.objects import Day, Location, Person, Trip
 
 
@@ -128,14 +128,19 @@ class FullCalendar:
         self.calendars[person] = SinglePersonCalendar(person)
         logging.info("Added %s to calendar", person)
 
-    def process_frontend_request(self, request_raw: MutableMapping[str, Any]) -> None:
-        """Process request (e.g. POST) from frontend."""
+    def process_frontend_request(self, request_raw: MutableMapping[str, Any]) -> Response:
+        """Process request (e.g. POST) from frontend and return string response."""
         logging.info("Processing request %s", request_raw)
         request = Request(request_raw)
         if request.request_type == RequestType.ADD_PERSON:
-            self._add_person(Person.from_request(request))
+            try:
+                person = Person.from_request(request)
+                self._add_person(person)
+                return Response(code=200, message=f"Added person {person}.")
+            except CalendarBaseException as err:
+                return Response(code=400, message=f"Failed to add person: {err.message}")
         else:
-            raise RequestError(f"Unknown request type: `{request.request_type}`.")
+            return Response(code=400, message=f"Unknown request type: `{request.request_type}`.")
 
     def render(self) -> str:
         logging.info("Rendering calendar.")

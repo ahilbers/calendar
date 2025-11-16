@@ -1,6 +1,7 @@
 """HTTP request utils."""
 
 from copy import copy
+from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any, Final, Mapping
 
@@ -28,3 +29,19 @@ class Request:
             raise RequestError(f"Unknown request type: `{request_type}`.")
         self.request_type = RequestType(request_raw.pop(REQUEST_TYPE_ID))  # type: ignore
         self.payload = request_raw  # Remaining fields after request type is popped off
+
+
+@dataclass(frozen=True)
+class Response:
+    """Response sent by server in response to client request."""
+
+    code: int
+    message: str
+
+    @property
+    def frontend_message(self) -> str:
+        """Print something that can be presented by the front-end"""
+        if self.code == 200:
+            return f"Success: {self.message}"
+        else:
+            return f"Error ({self.code}): {self.message}"

@@ -192,9 +192,11 @@ class TestFullCalendar:
             self.calendar.process_frontend_request(request_raw={REQUEST_TYPE_ID: "unknown_value"})
 
     def test_add_person(self):
-        self.calendar.process_frontend_request(
+        response = self.calendar.process_frontend_request(
             {REQUEST_TYPE_ID: RequestType.ADD_PERSON, "last_name": "lastname", "first_name": "firstname"}
         )
+
+        assert response.code == 200
         assert len(self.calendar.calendars) == 1
         person_calendar = list(self.calendar.calendars.values())[0]
         assert isinstance(person_calendar.person, Person)
@@ -210,6 +212,9 @@ class TestFullCalendar:
             "last_name": "lastname",
             "first_name": "firstname",
         }
-        self.calendar.process_frontend_request(request)
-        with pytest.raises(CalendarError):
-            self.calendar.process_frontend_request(request)
+
+        _ = self.calendar.process_frontend_request(request)
+        response = self.calendar.process_frontend_request(request)
+
+        assert response.code == 400
+        assert "is already in calendar" in response.message
