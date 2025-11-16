@@ -13,6 +13,12 @@
 <body>
     <h1>Friend Calendar</h1>
 
+    {# Calendar Memgers #}
+    <div>
+    <h2>Calendar Members</h2>
+    {{ calendar.render() | tojson }}
+    </div>
+
     {# Button: Display Calendar #}
     <div>
     <h2>View Calendar</h2>
