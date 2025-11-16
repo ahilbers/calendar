@@ -40,5 +40,11 @@
             <button type="submit">Submit</button>
         </form>
     </div>
+
+    {# Error messages #}
+    <div>
+        <h2>Status</h2>
+        <div class="error"> {{ response.frontend_message }} </div>
+    </div>
 </body>
 </html>
