@@ -2,13 +2,11 @@
 
 import datetime as dt
 import logging
-from typing import MutableMapping, Set
+from typing import Any, MutableMapping, Set
 
-from schedules.logic.errors import CalendarError, TripNotValidError
+from schedules.frontend.requests import Request, RequestType
+from schedules.logic.errors import CalendarBaseException, CalendarError, RequestError
 from schedules.logic.objects import Day, Location, Person, Trip
-from schedules.frontend.requests import Request
-
-logger = logging.getLogger(__package__)
 
 
 class SinglePersonCalendar:
@@ -19,7 +17,7 @@ class SinglePersonCalendar:
         self._home: Location = person.home
         self._trips: Set[Trip] = set()
         self._trip_list_cache: list[Trip] | None = None  # Cache sorted list, cleared whenever new trip is added
-        logger.info("Created calendar for %s", self.person)
+        logging.info("Created calendar for %s", self.person)
 
     def __repr__(self):
         return f"SinglePersonCalendar({self.person})"
@@ -28,14 +26,13 @@ class SinglePersonCalendar:
         """Check candidate new trip against existing trips and raise if it is invalid."""
         for existing in self._trips:
             if candidate.start_date == existing.start_date:
-                print(0)
-                raise TripNotValidError(f"Candidate {candidate} has same start date as {existing}.")
+                raise CalendarError(f"Candidate {candidate} has same start date as {existing}.")
             if candidate.end_date == existing.end_date:
-                raise TripNotValidError(f"Candidate {candidate} has same end date as {existing}.")
+                raise CalendarError(f"Candidate {candidate} has same end date as {existing}.")
             if candidate.start_date < existing.start_date and candidate.end_date > existing.start_date:
-                raise TripNotValidError(f"Candidate {candidate} falls partially in {existing}.")
+                raise CalendarError(f"Candidate {candidate} falls partially in {existing}.")
             if candidate.start_date < existing.end_date and candidate.end_date > existing.end_date:
-                raise TripNotValidError(f"Candidate {candidate} falls partially in {existing}.")
+                raise CalendarError(f"Candidate {candidate} falls partially in {existing}.")
 
     @property
     def trip_list(self) -> list[Trip]:
@@ -47,7 +44,7 @@ class SinglePersonCalendar:
     def add_trip(self, trip: Trip) -> None:
         self._trip_list_cache = None  # Clear cache whenever new trip is added, needs to be recalculated
         self._raise_if_invalid_trip(candidate=trip)
-        logger.info("Adding trip %s to calendar %s", trip, self)
+        logging.info("Adding trip %s to calendar %s", trip, self)
         self._trips.add(trip)
 
     def _get_travel_start_of_trip(self, trip_idx: int) -> Day:
@@ -129,10 +126,20 @@ class FullCalendar:
         if person in self.calendars.keys():
             raise CalendarError(f"Person {person} is already in calendar.")
         self.calendars[person] = SinglePersonCalendar(person)
-        logger.info("Added %s to calendar", person)
+        logging.info("Added %s to calendar", person)
 
-    def process_request(self, request: Request) -> None:
-        logger.info("Processing request %s", request)
+    def process_frontend_request(self, request_raw: MutableMapping[str, Any]) -> None:
+        """Process request (e.g. POST) from frontend."""
+        logging.info("Processing request %s", request_raw)
+        request = Request(request_raw)
+        try:
+            if request.request_type == RequestType.ADD_PERSON:
+                self._add_person(Person.from_request(request))
+            else:
+                raise RequestError(f"Unknown request: `{request}`.")
+        except CalendarBaseException as err:
+            logging.exception(f"Error processing request: {err}.")
 
     def render(self) -> str:
-        return "TODO: Render Calendar Here"
+        logging.info("Rendering calendar.")
+        return f"TODO: Render Calendar Here."

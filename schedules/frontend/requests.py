@@ -1,8 +1,13 @@
 """HTTP request utils."""
 
-from dataclasses import dataclass
+from copy import copy
 from enum import StrEnum
-from typing import Any
+from typing import Any, Mapping
+
+from schedules.logic.errors import RequestError
+
+
+REQUEST_TYPE_ID = "request_type"  # Key used in HTTP requests to indicate the type of request
 
 
 class RequestType(StrEnum):
@@ -11,9 +16,12 @@ class RequestType(StrEnum):
     ADD_PERSON = "ADD_PERSON"
 
 
-@dataclass(frozen=True)
 class Request:
-    """Used to pass around requests between frontend and backend"""
+    """Parsed request from frontend, splitting request type and payload."""
 
-    request_type: RequestType
-    payload: dict[str, Any]
+    def __init__(self, request_raw: Mapping[str, Any]):
+        request_raw = copy(request_raw)
+        if not isinstance(request_raw.get(REQUEST_TYPE_ID), str):
+            raise RequestError(f"Raw request {request_raw} must contain key {REQUEST_TYPE_ID} with string value.")
+        self.request_type = RequestType(request_raw.pop(REQUEST_TYPE_ID))  # type: ignore
+        self.payload = request_raw  # Remaining fields after request type is popped off
