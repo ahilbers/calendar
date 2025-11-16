@@ -41,4 +41,7 @@ class Response:
     @property
     def frontend_message(self) -> str:
         """Print something that can be presented by the front-end"""
-        return f"Error ({self.code}): {self.message}"
+        if self.code == 200:
+            return f"Success: {self.message}"
+        else:
+            return f"Error ({self.code}): {self.message}"
