@@ -2,9 +2,10 @@
 
 import datetime as dt
 import logging
-from typing import MutableMapping, Set
+from typing import Any, MutableMapping, Set
 
-from schedules.logic.errors import CalendarError, TripNotValidError
+from schedules.logic.requests import Request, RequestType
+from schedules.logic.errors import CalendarBaseException, CalendarError, RequestError
 from schedules.logic.objects import Day, Location, Person, Trip
 
 
@@ -25,14 +26,13 @@ class SinglePersonCalendar:
         """Check candidate new trip against existing trips and raise if it is invalid."""
         for existing in self._trips:
             if candidate.start_date == existing.start_date:
-                print(0)
-                raise TripNotValidError(f"Candidate {candidate} has same start date as {existing}.")
+                raise CalendarError(f"Candidate {candidate} has same start date as {existing}.")
             if candidate.end_date == existing.end_date:
-                raise TripNotValidError(f"Candidate {candidate} has same end date as {existing}.")
+                raise CalendarError(f"Candidate {candidate} has same end date as {existing}.")
             if candidate.start_date < existing.start_date and candidate.end_date > existing.start_date:
-                raise TripNotValidError(f"Candidate {candidate} falls partially in {existing}.")
+                raise CalendarError(f"Candidate {candidate} falls partially in {existing}.")
             if candidate.start_date < existing.end_date and candidate.end_date > existing.end_date:
-                raise TripNotValidError(f"Candidate {candidate} falls partially in {existing}.")
+                raise CalendarError(f"Candidate {candidate} falls partially in {existing}.")
 
     @property
     def trip_list(self) -> list[Trip]:
@@ -113,17 +113,30 @@ class SinglePersonCalendar:
         return daily_calendar
 
 
-class Calendar:
+class FullCalendar:
     """A full calendar, with multiple people."""
 
     def __init__(self) -> None:
         self.calendars: MutableMapping[Person, SinglePersonCalendar] = dict()
 
     def __repr__(self) -> str:
-        return f"Calendar({','.join(sorted(str(person) for person in self.calendars.keys()))})"
+        return f"FullCalendar({','.join(sorted(str(person) for person in self.calendars.keys()))})"
 
-    def add_person(self, person: Person) -> None:
+    def _add_person(self, person: Person) -> None:
         if person in self.calendars.keys():
             raise CalendarError(f"Person {person} is already in calendar.")
         self.calendars[person] = SinglePersonCalendar(person)
         logging.info("Added %s to calendar", person)
+
+    def process_frontend_request(self, request_raw: MutableMapping[str, Any]) -> None:
+        """Process request (e.g. POST) from frontend."""
+        logging.info("Processing request %s", request_raw)
+        request = Request(request_raw)
+        if request.request_type == RequestType.ADD_PERSON:
+            self._add_person(Person.from_request(request))
+        else:
+            raise RequestError(f"Unknown request type: `{request.request_type}`.")
+
+    def render(self) -> str:
+        logging.info("Rendering calendar.")
+        return f"TODO: Render Calendar Here."
