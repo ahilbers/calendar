@@ -123,7 +123,7 @@ class FullCalendar:
         self.calendars: MutableMapping[Person, SinglePersonCalendar] = dict()
 
     def __repr__(self) -> str:
-        return f"Calendar({','.join(sorted(str(person) for person in self.calendars.keys()))})"
+        return f"FullCalendar({','.join(sorted(str(person) for person in self.calendars.keys()))})"
 
     def _add_person(self, person: Person) -> None:
         if person in self.calendars.keys():

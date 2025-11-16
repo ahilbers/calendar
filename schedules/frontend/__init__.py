@@ -1,23 +1,14 @@
 import os
 
 from dotenv import load_dotenv
-from flask import Flask
 
+from schedules.frontend.objects import AppWithCalendar
 from schedules.frontend.pages import pages
-from schedules.logic.calendar import FullCalendar
 
 load_dotenv()
 
 
-class AppWithCalendar(Flask):
-    """An app, with a calendar object attached."""
-
-    def __init__(self, import_name: str):
-        super().__init__(import_name)
-        self.calendar = FullCalendar()
-
-
-def create_app():
+def create_app() -> AppWithCalendar:
     app = AppWithCalendar(__name__)
 
     # Set up flask key

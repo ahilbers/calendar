@@ -1,4 +1,4 @@
-"""Base objects used in calendars."""
+"""Base objects used in (backend) logic."""
 
 import dataclasses
 import datetime as dt
