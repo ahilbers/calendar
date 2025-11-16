@@ -2,12 +2,12 @@
 
 from copy import copy
 from enum import StrEnum
-from typing import Any, Mapping
+from typing import Any, Final, Mapping
 
 from schedules.logic.errors import RequestError
 
 
-REQUEST_TYPE_ID = "request_type"  # Key used in HTTP requests to indicate the type of request
+REQUEST_TYPE_ID: Final[str] = "request_type"  # Key used in HTTP requests to indicate the type of request
 
 
 class RequestType(StrEnum):

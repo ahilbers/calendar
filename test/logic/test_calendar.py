@@ -200,17 +200,16 @@ class TestFullCalendar:
         assert isinstance(person_calendar.person, Person)
         assert person_calendar.person.last_name == StrID("lastname")
         assert person_calendar.person.first_name == StrID("firstname")
+        # TODO: Allow multiple locations
+        assert person_calendar.person.home == Location(Country.NETHERLANDS, city=StrID("Amsterdam"))
         assert person_calendar.trip_list == []
 
-    # def test_add_person(self):
-    #     calendar = FullCalendar()
-    #     person = sample_person()
-    #     calendar._add_person(person)  # pyright: ignore[reportPrivateUsage]
-    #     assert calendar.calendars[person].trip_list == []
-
-    # def test_fails_if_adding_person_twice(self):
-    #     calendar = FullCalendar()
-    #     person, person_duplicate = sample_person(), sample_person()
-    #     calendar._add_person(person)  # pyright: ignore[reportPrivateUsage]
-    #     with pytest.raises(CalendarError):
-    #         calendar._add_person(person_duplicate)  # pyright: ignore[reportPrivateUsage]
+    def test_raises_on_adding_existing_person(self):
+        request: dict[str, str] = {
+            REQUEST_TYPE_ID: RequestType.ADD_PERSON,
+            "last_name": "lastname",
+            "first_name": "firstname",
+        }
+        self.calendar.process_frontend_request(request)
+        with pytest.raises(CalendarError):
+            self.calendar.process_frontend_request(request)

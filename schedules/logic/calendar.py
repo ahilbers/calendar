@@ -132,13 +132,10 @@ class FullCalendar:
         """Process request (e.g. POST) from frontend."""
         logging.info("Processing request %s", request_raw)
         request = Request(request_raw)
-        try:
-            if request.request_type == RequestType.ADD_PERSON:
-                self._add_person(Person.from_request(request))
-            else:
-                raise RequestError(f"Unknown request: `{request}`.")
-        except CalendarBaseException as err:
-            logging.exception(f"Error processing request: {err}.")
+        if request.request_type == RequestType.ADD_PERSON:
+            self._add_person(Person.from_request(request))
+        else:
+            raise RequestError(f"Unknown request type: `{request.request_type}`.")
 
     def render(self) -> str:
         logging.info("Rendering calendar.")
