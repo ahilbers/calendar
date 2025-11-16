@@ -14,7 +14,7 @@ def create_app() -> AppWithCalendar:
     # Set up flask key
     secret_key = os.environ.get("FLASK_KEY")
     if secret_key is None:
-        raise RuntimeError("Secret key not defined. Create .env file of form:\n\n" "FLASK_KEY='<MY_SECRET_KEY>'\n\n")
+        raise RuntimeError("Secret key not defined. Create .env file of form:\n\nFLASK_KEY='<MY_SECRET_KEY>'\n\n")
     app.config["SECRET_KEY"] = secret_key
 
     # Generate pages

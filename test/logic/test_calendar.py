@@ -117,7 +117,6 @@ class TestDailyCalendar:
         assert daily_calendar_actual == daily_calendar_expected
 
     def test_trips_disjoint(self):
-
         trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 25))
         trip_2 = Trip(Location(Country.UNITED_KINGDOM, StrID("London")), dt.date(2024, 6, 27), dt.date(2024, 6, 29))
         self.calendar.add_trip(trip_1)
@@ -139,7 +138,6 @@ class TestDailyCalendar:
         assert daily_calendar_actual == daily_calendar_expected
 
     def test_trips_connected(self):
-
         trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 25))
         trip_2 = Trip(Location(Country.UNITED_KINGDOM, StrID("London")), dt.date(2024, 6, 25), dt.date(2024, 6, 27))
         self.calendar.add_trip(trip_1)
@@ -159,7 +157,6 @@ class TestDailyCalendar:
         assert daily_calendar_actual == daily_calendar_expected
 
     def test_trip_fully_contained(self):
-
         trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 22), dt.date(2024, 6, 28))
         trip_2 = Trip(Location(Country.UNITED_KINGDOM, StrID("London")), dt.date(2024, 6, 24), dt.date(2024, 6, 26))
         self.calendar.add_trip(trip_1)
