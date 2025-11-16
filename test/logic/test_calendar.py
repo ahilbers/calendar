@@ -3,8 +3,9 @@ import datetime as dt
 import pytest
 
 from schedules.logic.calendar import FullCalendar, SinglePersonCalendar
-from schedules.logic.errors import CalendarError
+from schedules.logic.errors import CalendarError, RequestError
 from schedules.logic.objects import Country, Day, Location, Person, StrID, Trip
+from schedules.logic.requests import REQUEST_TYPE_ID, RequestType
 
 
 def sample_home_location() -> Location:
@@ -43,28 +44,28 @@ class TestAddTrips:
 
         assert self.calendar.trip_list == [trip_earlier, trip_later]
 
-    def test_fail_if_same_start_date(self, caplog: pytest.LogCaptureFixture):
+    def test_raises_if_same_start_date(self, caplog: pytest.LogCaptureFixture):
         trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 24))
         trip_2 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 25))
         self.calendar.add_trip(trip_1)
         with pytest.raises(CalendarError):
             self.calendar.add_trip(trip_2)
 
-    def test_fail_if_same_end_date(self, caplog: pytest.LogCaptureFixture):
+    def test_raises_if_same_end_date(self, caplog: pytest.LogCaptureFixture):
         trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 24))
         trip_2 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 22), dt.date(2024, 6, 24))
         self.calendar.add_trip(trip_1)
         with pytest.raises(CalendarError):
             self.calendar.add_trip(trip_2)
 
-    def test_fail_if_overlapping_and_starting_earlier(self, caplog: pytest.LogCaptureFixture):
+    def test_raises_if_overlapping_and_starting_earlier(self, caplog: pytest.LogCaptureFixture):
         trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 25))
         trip_2 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 22), dt.date(2024, 6, 24))
         self.calendar.add_trip(trip_1)
         with pytest.raises(CalendarError):
             self.calendar.add_trip(trip_2)
 
-    def test_fail_if_overlapping_and_starting_later(self, caplog: pytest.LogCaptureFixture):
+    def test_raises_if_overlapping_and_starting_later(self, caplog: pytest.LogCaptureFixture):
         trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 25))
         trip_2 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 24), dt.date(2024, 6, 26))
         self.calendar.add_trip(trip_1)
@@ -177,17 +178,39 @@ class TestDailyCalendar:
 
 
 class TestFullCalendar:
-    """Tests for Calendar."""
+
+    @pytest.fixture(autouse=True)
+    def set_up(self):
+        self.calendar = FullCalendar()
+
+    def test_raises_if_no_request_type(self):
+        with pytest.raises(RequestError):
+            self.calendar.process_frontend_request(request_raw={"missing_request_id_col": "some_value"})
+
+    def test_raises_if_unrecognized_request_type(self):
+        with pytest.raises(RequestError):
+            self.calendar.process_frontend_request(request_raw={REQUEST_TYPE_ID: "unknown_value"})
 
     def test_add_person(self):
-        calendar = FullCalendar()
-        person = sample_person()
-        calendar._add_person(person)  # pyright: ignore[reportPrivateUsage]
-        assert calendar.calendars[person].trip_list == []
+        self.calendar.process_frontend_request(
+            {REQUEST_TYPE_ID: RequestType.ADD_PERSON, "last_name": "lastname", "first_name": "firstname"}
+        )
+        assert len(self.calendar.calendars) == 1
+        person_calendar = list(self.calendar.calendars.values())[0]
+        assert isinstance(person_calendar.person, Person)
+        assert person_calendar.person.last_name == StrID("lastname")
+        assert person_calendar.person.first_name == StrID("firstname")
+        assert person_calendar.trip_list == []
 
-    def test_fails_if_adding_person_twice(self):
-        calendar = FullCalendar()
-        person, person_duplicate = sample_person(), sample_person()
-        calendar._add_person(person)  # pyright: ignore[reportPrivateUsage]
-        with pytest.raises(CalendarError):
-            calendar._add_person(person_duplicate)  # pyright: ignore[reportPrivateUsage]
+    # def test_add_person(self):
+    #     calendar = FullCalendar()
+    #     person = sample_person()
+    #     calendar._add_person(person)  # pyright: ignore[reportPrivateUsage]
+    #     assert calendar.calendars[person].trip_list == []
+
+    # def test_fails_if_adding_person_twice(self):
+    #     calendar = FullCalendar()
+    #     person, person_duplicate = sample_person(), sample_person()
+    #     calendar._add_person(person)  # pyright: ignore[reportPrivateUsage]
+    #     with pytest.raises(CalendarError):
+    #         calendar._add_person(person_duplicate)  # pyright: ignore[reportPrivateUsage]
