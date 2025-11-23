@@ -13,8 +13,29 @@
 <body>
     <h1>Friend Calendar</h1>
 
-    {# Button: Display Calendar #}
+    {# Calendar Memgers #}
     <div>
+    <h2>Calendar Members</h2>
+    {# {{ calendar.single_person_calendars | tojson }} #}
+    <table>
+        <thead>
+            <tr> <th>Name</th> <th>Home</th> </tr>
+        </thead>
+        <tbody>
+            {% for single_person_calendar in calendar.single_person_calendars %}
+                <tr>
+                    <td> {{ single_person_calendar.person.display_name_frontend }} </td>
+                    <td> {{ single_person_calendar.person.home.display_name_frontend }} </td>
+                </tr>    
+            {% endfor %}
+        </tbody>
+    </table>
+    
+
+    </div>
+
+    {# Button: Display Calendar #}
+    {# <div>
     <h2>View Calendar</h2>
     <button id="show-calendar">Show Calendar</button>
     <div id="calendar-container"></div>
@@ -24,20 +45,43 @@
             document.getElementById("calendar-container").textContent = calendar_render
         })
     </script>
-    </div>
+    </div> #}
 
     {# Form: Add person #}
     <div>
         <h2>Add Person</h2>
         <form method="post">
             <input type="hidden" name="request_type" value={{ RequestType.ADD_PERSON }}>
+
+            {# Free field for last and first name #}
             <label style="display:block; margin-bottom:10px;">
                 Last Name: <input type="text" name="last_name">
             </label>
             <label style="display:block; margin-bottom:10px">
                 First Name: <input type="text" name="first_name">
             </label>
+
+            {# Drop-down list for home country, free field for home city#}
+            <label style="display:block; margin-bottom:10px">
+                Country:
+                <select id="country", name="home_country">
+                    {% for c in objects.Country %}
+                        <option value="{{ c.name }}">{{ c.value.replace("_", " ").title() }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label style="display:block; margin-bottom:10px">
+                City: <input type="text" name="home_city">
+            </label>
+
+            {# Submit button #}
             <button type="submit">Submit</button>
+        </form>
+
+        {# Button to clear all people #}
+        <form method="post">
+            <input type="hidden" name="request_type" value={{ RequestType.CLEAR_ALL_PEOPLE }}>
+            <button type="submit">Clear</button>
         </form>
     </div>
 

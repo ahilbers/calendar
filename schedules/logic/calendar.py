@@ -119,14 +119,15 @@ class FullCalendar:
     def __init__(self) -> None:
         self.calendars: MutableMapping[Person, SinglePersonCalendar] = dict()
 
-    def __repr__(self) -> str:
-        return f"FullCalendar({','.join(sorted(str(person) for person in self.calendars.keys()))})"
-
     def _add_person(self, person: Person) -> None:
         if person in self.calendars.keys():
             raise CalendarError(f"Person {person} is already in calendar.")
         self.calendars[person] = SinglePersonCalendar(person)
         logging.info("Added %s to calendar", person)
+
+    def _clear_all_people(self) -> None:
+        self.calendars = dict()
+        logging.info("Cleared all people from calendar.")
 
     def process_frontend_request(self, request_raw: MutableMapping[str, Any]) -> Response:
         """Process request (e.g. POST) from frontend and return string response."""
@@ -139,9 +140,15 @@ class FullCalendar:
                 return Response(code=200, message=f"Added person {person}.")
             except CalendarBaseException as err:
                 return Response(code=400, message=f"Failed to add person: {err.message}")
+        if request.request_type == RequestType.CLEAR_ALL_PEOPLE:
+            self._clear_all_people()
+            return Response(code=200, message="Cleared all people from calendar.")
+
         else:
             return Response(code=400, message=f"Unknown request type: `{request.request_type}`.")
 
-    def render(self) -> str:
-        logging.info("Rendering calendar.")
-        return f"TODO: Render Calendar Here."
+    @property
+    def single_person_calendars(self) -> list[SinglePersonCalendar]:
+        """Get list of single-person calendars, sorted by name."""
+        people_sorted = sorted(self.calendars.keys(), key=lambda person: (person.last_name, person.first_name))
+        return [self.calendars[person] for person in people_sorted]

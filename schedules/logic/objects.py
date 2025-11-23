@@ -2,19 +2,18 @@
 
 import dataclasses
 import datetime as dt
-import enum
+from enum import StrEnum
 from typing import Self
 
 from schedules.logic.requests import Request
 from schedules.logic.errors import RequestError
 
 
-class Country(enum.Enum):
+class Country(StrEnum):
     NETHERLANDS = "NETHERLANDS"
     NORWAY = "NORWAY"
     SWITZERLAND = "SWITZERLAND"
     UNITED_KINGDOM = "UNITED_KINGDOM"
-    UNITED_STATES = "UNITED_STATES"
 
 
 class StrID(str):
@@ -39,6 +38,10 @@ class Location:
         if not len(self.city) > 0:
             raise RequestError(f"City name must be set: `{self.city}`.")
 
+    @property
+    def display_name_frontend(self) -> str:
+        return f"{self.city.title()}, {self.country.title()}"
+
 
 @dataclasses.dataclass(frozen=True)
 class Person:
@@ -55,8 +58,15 @@ class Person:
         return cls(
             last_name=StrID(str(request.payload.get("last_name"))),
             first_name=StrID(str(request.payload.get("first_name"))),
-            home=Location(country=Country.NETHERLANDS, city=StrID("Amsterdam")),  # TODO: Actually set
+            home=Location(
+                country=Country[str(request.payload.get("home_country"))],
+                city=StrID(str(request.payload.get("home_city"))),
+            ),
         )
+
+    @property
+    def display_name_frontend(self) -> str:
+        return f"{self.last_name.title()}, {self.first_name.title()}"
 
 
 @dataclasses.dataclass(frozen=True)
