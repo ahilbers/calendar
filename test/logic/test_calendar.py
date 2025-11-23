@@ -2,6 +2,7 @@ import datetime as dt
 
 import pytest
 
+from schedules.logic import objects
 from schedules.logic.calendar import FullCalendar, SinglePersonCalendar
 from schedules.logic.errors import CalendarError, RequestError
 from schedules.logic.objects import Country, Day, Location, Person, StrID, Trip
@@ -192,9 +193,14 @@ class TestFullCalendar:
             self.calendar.process_frontend_request(request_raw={REQUEST_TYPE_ID: "unknown_value"})
 
     def test_add_person(self):
-        response = self.calendar.process_frontend_request(
-            {REQUEST_TYPE_ID: RequestType.ADD_PERSON, "last_name": "lastname", "first_name": "firstname"}
-        )
+        request = {
+            REQUEST_TYPE_ID: RequestType.ADD_PERSON,
+            "last_name": "lastname",
+            "first_name": "firstname",
+            "home_country": objects.Country.NETHERLANDS.name,
+            "home_city": "Amsterdam",
+        }  # fmt: skip
+        response = self.calendar.process_frontend_request(request)
 
         assert response.code == 200
         assert len(self.calendar.calendars) == 1
@@ -202,7 +208,6 @@ class TestFullCalendar:
         assert isinstance(person_calendar.person, Person)
         assert person_calendar.person.last_name == StrID("lastname")
         assert person_calendar.person.first_name == StrID("firstname")
-        # TODO: Allow multiple locations
         assert person_calendar.person.home == Location(Country.NETHERLANDS, city=StrID("Amsterdam"))
         assert person_calendar.trip_list == []
 
@@ -211,6 +216,8 @@ class TestFullCalendar:
             REQUEST_TYPE_ID: RequestType.ADD_PERSON,
             "last_name": "lastname",
             "first_name": "firstname",
+            "home_country": objects.Country.NETHERLANDS.name,
+            "home_city": "Amsterdam",
         }
 
         _ = self.calendar.process_frontend_request(request)

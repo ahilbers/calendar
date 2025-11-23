@@ -52,16 +52,20 @@
         <h2>Add Person</h2>
         <form method="post">
             <input type="hidden" name="request_type" value={{ RequestType.ADD_PERSON }}>
+
+            {# Free field for last and first name #}
             <label style="display:block; margin-bottom:10px;">
                 Last Name: <input type="text" name="last_name">
             </label>
             <label style="display:block; margin-bottom:10px">
                 First Name: <input type="text" name="first_name">
             </label>
+
+            {# Drop-down list for home country, free field for home city#}
             <label style="display:block; margin-bottom:10px">
                 Country:
                 <select id="country", name="home_country">
-                    {% for c in objects.Country%}
+                    {% for c in objects.Country %}
                         <option value="{{ c.name }}">{{ c.value.replace("_", " ").title() }}</option>
                     {% endfor %}
                 </select>
