@@ -14,7 +14,6 @@ class Country(StrEnum):
     NORWAY = "NORWAY"
     SWITZERLAND = "SWITZERLAND"
     UNITED_KINGDOM = "UNITED_KINGDOM"
-    UNITED_STATES = "UNITED_STATES"
 
 
 class StrID(str):

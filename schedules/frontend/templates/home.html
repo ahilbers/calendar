@@ -60,6 +60,11 @@
             </label>
             <button type="submit">Submit</button>
         </form>
+        <form method="post">
+            <input type="hidden" name="request_type" value={{ RequestType.CLEAR_ALL_PEOPLE }}>
+            <button type="submit">Clear</button>
+        </form>
+        
     </div>
 
     {# Error messages #}
