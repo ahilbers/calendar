@@ -1,4 +1,5 @@
 import datetime as dt
+from typing import Any
 
 import pytest
 
@@ -183,6 +184,13 @@ class TestFullCalendar:
     @pytest.fixture(autouse=True)
     def set_up(self):
         self.calendar = FullCalendar()
+        self.add_person_request: dict[str, Any] = {
+            REQUEST_TYPE_ID: RequestType.ADD_PERSON,
+            "last_name": "lastname",
+            "first_name": "firstname",
+            "home_country": objects.Country.NETHERLANDS.name,
+            "home_city": "Amsterdam",
+        }
 
     def test_raises_if_no_request_type(self):
         with pytest.raises(RequestError):
@@ -193,14 +201,7 @@ class TestFullCalendar:
             self.calendar.process_frontend_request(request_raw={REQUEST_TYPE_ID: "unknown_value"})
 
     def test_add_person(self):
-        request = {
-            REQUEST_TYPE_ID: RequestType.ADD_PERSON,
-            "last_name": "lastname",
-            "first_name": "firstname",
-            "home_country": objects.Country.NETHERLANDS.name,
-            "home_city": "Amsterdam",
-        }  # fmt: skip
-        response = self.calendar.process_frontend_request(request)
+        response = self.calendar.process_frontend_request(self.add_person_request)
 
         assert response.code == 200
         assert len(self.calendar.calendars) == 1
@@ -212,16 +213,15 @@ class TestFullCalendar:
         assert person_calendar.trip_list == []
 
     def test_raises_on_adding_existing_person(self):
-        request: dict[str, str] = {
-            REQUEST_TYPE_ID: RequestType.ADD_PERSON,
-            "last_name": "lastname",
-            "first_name": "firstname",
-            "home_country": objects.Country.NETHERLANDS.name,
-            "home_city": "Amsterdam",
-        }
-
-        _ = self.calendar.process_frontend_request(request)
-        response = self.calendar.process_frontend_request(request)
+        _ = self.calendar.process_frontend_request(self.add_person_request)
+        response = self.calendar.process_frontend_request(self.add_person_request)
 
         assert response.code == 400
         assert "is already in calendar" in response.message
+
+    def test_clear_all_people(self):
+        _ = self.calendar.process_frontend_request(self.add_person_request)
+        assert len(self.calendar.calendars) == 1
+        response = self.calendar.process_frontend_request({REQUEST_TYPE_ID: RequestType.CLEAR_ALL_PEOPLE})
+        assert response.code == 200
+        assert len(self.calendar.calendars) == 0
