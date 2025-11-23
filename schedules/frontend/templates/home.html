@@ -58,13 +58,33 @@
             <label style="display:block; margin-bottom:10px">
                 First Name: <input type="text" name="first_name">
             </label>
+            <label style="display:block; margin-bottom:10px">
+                Country:
+                <select id="country", name="home_country">
+                    {% for c in objects.Country%}
+                        <option value="{{ c.name }}">{{ c.value.replace("_", " ").title() }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label style="display:block; margin-bottom:10px">
+                City: <input type="text" name="home_city">
+            </label>
             <button type="submit">Submit</button>
         </form>
         <form method="post">
             <input type="hidden" name="request_type" value={{ RequestType.CLEAR_ALL_PEOPLE }}>
             <button type="submit">Clear</button>
         </form>
-        
+    </div>
+
+    {# Country list #}
+    <div>
+        <h2>Country List</h2>
+        <select id="country", name="country">
+          {% for c in objects.Country%}
+            <option value="{{ c.name }}">{{ c.value.replace("_", " ").title() }}</option>
+          {% endfor %}
+        </select>
     </div>
 
     {# Error messages #}

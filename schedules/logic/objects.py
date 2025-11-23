@@ -58,7 +58,10 @@ class Person:
         return cls(
             last_name=StrID(str(request.payload.get("last_name"))),
             first_name=StrID(str(request.payload.get("first_name"))),
-            home=Location(country=Country.NETHERLANDS, city=StrID("Amsterdam")),  # TODO: Actually set
+            home=Location(
+                country=Country[str(request.payload.get("home_country"))],
+                city=StrID(str(request.payload.get("home_city"))),
+            ),
         )
 
     @property
