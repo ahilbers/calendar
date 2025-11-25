@@ -15,37 +15,27 @@
 
     {# Calendar Members #}
     <div>
-    <h2>Calendar Members</h2>
-    {# {{ calendar.single_person_calendars | tojson }} #}
-    <table>
-        <thead>
-            <tr> <th>Name</th> <th>Home</th> </tr>
-        </thead>
-        <tbody>
-            {% for single_person_calendar in calendar.single_person_calendars %}
-                <tr>
-                    <td> {{ single_person_calendar.person.display_name_frontend }} </td>
-                    <td> {{ single_person_calendar.person.home.display_name_frontend }} </td>
-                </tr>    
-            {% endfor %}
-        </tbody>
-    </table>
-    
+        <h2>Calendar Members</h2>
+        <table>
+            <thead>
+                <tr> <th>Name</th> <th>Home</th> </tr>
+            </thead>
+            <tbody>
+                {% for single_person_calendar in calendar.single_person_calendars %}
+                    <tr>
+                        <td> {{ single_person_calendar.person.display_name_frontend }} </td>
+                        <td> {{ single_person_calendar.person.home.display_name_frontend }} </td>
+                    </tr>    
+                {% endfor %}
+            </tbody>
+        </table>
 
+        {# Button to clear all people #}
+        <form method="post">
+            <input type="hidden" name="request_type" value={{ RequestType.CLEAR_ALL_PEOPLE }}>
+            <button type="submit">Clear All Members</button>
+        </form>
     </div>
-
-    {# Button: Display Calendar #}
-    {# <div>
-    <h2>View Calendar</h2>
-    <button id="show-calendar">Show Calendar</button>
-    <div id="calendar-container"></div>
-    <script>
-        const calendar_render = {{ calendar.render() | tojson }}
-        document.getElementById("show-calendar").addEventListener("click", () => {
-            document.getElementById("calendar-container").textContent = calendar_render
-        })
-    </script>
-    </div> #}
 
     {# Form: Add person #}
     <div>
@@ -61,7 +51,7 @@
                 First Name: <input type="text" name="first_name">
             </label>
 
-            {# Drop-down list for home country, free field for home city#}
+            {# Drop-down list for home country, free field for home city #}
             <label style="display:block; margin-bottom:10px">
                 Country:
                 <select id="country", name="home_country">
@@ -77,15 +67,49 @@
             {# Submit button #}
             <button type="submit">Submit</button>
         </form>
+    </div>
 
-        {# Button to clear all people #}
+    {# Form: Add Trip #}
+    <div>
+        <h2>Add Trip</h2>
         <form method="post">
-            <input type="hidden" name="request_type" value={{ RequestType.CLEAR_ALL_PEOPLE }}>
-            <button type="submit">Clear</button>
+            <input type="hidden" name="request_type" value={{ RequestType.ADD_TRIP }}>
+
+            {# Drop-down list for person #}
+            <label style="display:block; margin-bottom:10px">
+                Person:
+                <select id="person", name="trip_person">
+                    {% for single_person_calendar in calendar.single_person_calendars %}
+                        <option value="hello">{{ single_person_calendar.person.display_name_frontend }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+
+            {# Drop-down list for home country, free field for home city #}
+            <label style="display:block; margin-bottom:10px">
+                Country:
+                <select id="country", name="trip_country">
+                    {% for c in objects.Country %}
+                        <option value="{{ c.name }}">{{ c.value.replace("_", " ").title() }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label style="display:block; margin-bottom:10px">
+                City: <input type="text" name="trip_city">
+            </label>
+            <label style="display:block; margin-bottom:10px;">
+                Start: <input type="date" name="start_date">
+            </label>
+            <label style="display:block; margin-bottom:10px;">
+                End: <input type="date" name="end_date">
+            </label>
+
+            {# Submit button #}
+            <button type="submit">Submit</button>
         </form>
     </div>
 
-    {# Error messages #}
+    {# Status messages #}
     <div>
         <h2>Status</h2>
         <div class="error"> {{ response.frontend_message }} </div>
