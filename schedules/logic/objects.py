@@ -38,6 +38,13 @@ class Location:
         if not len(self.city) > 0:
             raise RequestError(f"City name must be set: `{self.city}`.")
 
+    @classmethod
+    def from_request(cls, request: Request) -> Self:
+        return cls(
+            country=Country[str(request.payload.get("country"))],
+            city=StrID(str(request.payload.get("city"))),
+        )
+
     @property
     def display_name_frontend(self) -> str:
         return f"{self.city.title()}, {self.country.title()}"
@@ -58,15 +65,16 @@ class Person:
         return cls(
             last_name=StrID(str(request.payload.get("last_name"))),
             first_name=StrID(str(request.payload.get("first_name"))),
-            home=Location(
-                country=Country[str(request.payload.get("home_country"))],
-                city=StrID(str(request.payload.get("home_city"))),
-            ),
+            home=Location.from_request(request),
         )
 
     @property
     def display_name_frontend(self) -> str:
         return f"{self.last_name.title()}, {self.first_name.title()}"
+
+    @property
+    def unique_id(self) -> int:
+        return hash(self)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -78,6 +86,14 @@ class Trip:
     def __post_init__(self) -> None:
         if not self.start_date < self.end_date:
             raise ValueError(f"Trip start date must be before end date: `{self.start_date}`, `{self.end_date}`.")
+
+    @classmethod
+    def from_request(cls, request: Request) -> Self:
+        return cls(
+            location=Location.from_request(request),
+            start_date=dt.date.strptime(request.payload["start_date"], "%Y-%m-%d"),
+            end_date=dt.date.strptime(request.payload["end_date"], "%Y-%m-%d"),
+        )
 
 
 @dataclasses.dataclass(frozen=True)

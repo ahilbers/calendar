@@ -16,6 +16,7 @@ class RequestType(StrEnum):
 
     ADD_PERSON = "ADD_PERSON"
     CLEAR_ALL_PEOPLE = "CLEAR_ALL_PEOPLE"
+    ADD_TRIP = "ADD_TRIP"
 
 
 class Request:
@@ -27,7 +28,7 @@ class Request:
         if not isinstance(request_type, str):
             raise RequestError(f"Raw request {request_raw} must contain key `{REQUEST_TYPE_ID}` with string value.")
         if not request_type in RequestType:
-            raise RequestError(f"Unknown request type: `{request_type}`.")
+            raise RequestError(f"Unknown request type: {request_type}.")
         self.request_type = RequestType(request_raw.pop(REQUEST_TYPE_ID))  # type: ignore
         self.payload = request_raw  # Remaining fields after request type is popped off
 

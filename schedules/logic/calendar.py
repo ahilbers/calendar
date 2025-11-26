@@ -2,10 +2,10 @@
 
 import datetime as dt
 import logging
-from typing import Any, MutableMapping, Set
+from typing import Any, Mapping, MutableMapping, Set
 
 from schedules.logic.requests import Request, RequestType, Response
-from schedules.logic.errors import CalendarBaseException, CalendarError
+from schedules.logic.errors import CalendarBaseException, CalendarError, RequestError
 from schedules.logic.objects import Day, Location, Person, Trip
 
 
@@ -118,21 +118,31 @@ class FullCalendar:
 
     def __init__(self) -> None:
         self.calendars: MutableMapping[Person, SinglePersonCalendar] = dict()
+        self._id_to_person: MutableMapping[int, Person] = dict()
 
     def _add_person(self, person: Person) -> None:
         if person in self.calendars.keys():
             raise CalendarError(f"Person {person} is already in calendar.")
         self.calendars[person] = SinglePersonCalendar(person)
+        self._id_to_person[hash(person)] = person
         logging.info("Added %s to calendar", person)
 
     def _clear_all_people(self) -> None:
         self.calendars = dict()
         logging.info("Cleared all people from calendar.")
 
-    def process_frontend_request(self, request_raw: MutableMapping[str, Any]) -> Response:
+    def _add_trip(self, person: Person, trip: Trip) -> None:
+        self.calendars[person].add_trip(trip)
+        logging.info(f"Added {trip} to calendar for {person}.")
+
+    def process_frontend_request(self, request_raw: Mapping[str, Any]) -> Response:
         """Process request (e.g. POST) from frontend and return string response."""
         logging.info("Processing request %s", request_raw)
-        request = Request(request_raw)
+        try:
+            request = Request(request_raw)
+        except RequestError as err:
+            return Response(code=400, message=f"Failed to parse request: {err}")
+
         if request.request_type == RequestType.ADD_PERSON:
             try:
                 person = Person.from_request(request)
@@ -140,12 +150,21 @@ class FullCalendar:
                 return Response(code=200, message=f"Added person {person}.")
             except CalendarBaseException as err:
                 return Response(code=400, message=f"Failed to add person: {err.message}")
+
         if request.request_type == RequestType.CLEAR_ALL_PEOPLE:
             self._clear_all_people()
             return Response(code=200, message="Cleared all people from calendar.")
 
-        else:
-            return Response(code=400, message=f"Unknown request type: `{request.request_type}`.")
+        if request.request_type == RequestType.ADD_TRIP:
+            try:
+                person = self._id_to_person[int(request.payload["person_id"])]
+                trip = Trip.from_request(request)
+                self._add_trip(person=person, trip=trip)
+                return Response(code=200, message=f"Added {trip} to calendar for {person}.")
+            except CalendarBaseException as err:
+                return Response(code=400, message=f"Failed to add trip: {err.message}")
+
+        return Response(code=400, message=f"Unknown request type: {request.request_type}.")
 
     @property
     def single_person_calendars(self) -> list[SinglePersonCalendar]:
