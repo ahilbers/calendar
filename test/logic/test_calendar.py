@@ -188,21 +188,22 @@ class TestFullCalendar:
             REQUEST_TYPE_ID: RequestType.ADD_PERSON,
             "last_name": "lastname",
             "first_name": "firstname",
-            "home_country": objects.Country.NETHERLANDS.name,
-            "home_city": "Amsterdam",
+            "country": objects.Country.NETHERLANDS.name,
+            "city": "Amsterdam",
         }
 
-    def test_raises_if_no_request_type(self):
-        with pytest.raises(RequestError):
-            self.calendar.process_frontend_request(request_raw={"missing_request_id_col": "some_value"})
+    def test_bad_response_if_no_request_type(self):
+        response = self.calendar.process_frontend_request(request_raw={"missing_request_id_col": "some_value"})
+        assert response.code == 400
+        assert "must contain key" in response.message
 
-    def test_raises_if_unrecognized_request_type(self):
-        with pytest.raises(RequestError):
-            self.calendar.process_frontend_request(request_raw={REQUEST_TYPE_ID: "unknown_value"})
+    def test_bad_response_if_unrecognized_request_type(self):
+        response = self.calendar.process_frontend_request(request_raw={REQUEST_TYPE_ID: "unknown_value"})
+        assert response.code == 400
+        assert "Unknown request type" in response.message
 
     def test_add_person(self):
         response = self.calendar.process_frontend_request(self.add_person_request)
-
         assert response.code == 200
         assert len(self.calendar.calendars) == 1
         person_calendar = list(self.calendar.calendars.values())[0]
@@ -215,7 +216,6 @@ class TestFullCalendar:
     def test_raises_on_adding_existing_person(self):
         _ = self.calendar.process_frontend_request(self.add_person_request)
         response = self.calendar.process_frontend_request(self.add_person_request)
-
         assert response.code == 400
         assert "is already in calendar" in response.message
 
@@ -225,3 +225,23 @@ class TestFullCalendar:
         response = self.calendar.process_frontend_request({REQUEST_TYPE_ID: RequestType.CLEAR_ALL_PEOPLE})
         assert response.code == 200
         assert len(self.calendar.calendars) == 0
+
+    def test_add_trip(self):
+        _ = self.calendar.process_frontend_request(self.add_person_request)
+        person = list(self.calendar.calendars.keys())[0]
+        add_trip_request = {
+            "request_type": "ADD_TRIP",
+            "person_id": str(hash(person)),
+            "country": "NETHERLANDS",
+            "city": "Amsterdam",
+            "start_date": "2025-11-25",
+            "end_date": "2025-11-28",
+        }
+        response = self.calendar.process_frontend_request(add_trip_request)
+        assert response.code == 200
+        trip_list = self.calendar.calendars[person].trip_list
+        assert len(trip_list) == 1
+        trip = trip_list[0]
+        assert trip.location == Location(Country.NETHERLANDS, city=StrID("Amsterdam"))
+        assert trip.start_date == dt.date(2025, 11, 25)
+        assert trip.end_date == dt.date(2025, 11, 28)
