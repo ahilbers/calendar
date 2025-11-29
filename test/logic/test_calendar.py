@@ -180,7 +180,6 @@ class TestDailyCalendar:
 
 
 class TestFullCalendar:
-
     @pytest.fixture(autouse=True)
     def set_up(self):
         self.calendar = FullCalendar()
