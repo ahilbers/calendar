@@ -3,12 +3,14 @@
 import dataclasses
 import datetime as dt
 from enum import StrEnum
+from enum import StrEnum
 from typing import Self
 
 from schedules.logic.requests import Request
 from schedules.logic.errors import RequestError
 
 
+class Country(StrEnum):
 class Country(StrEnum):
     NETHERLANDS = "NETHERLANDS"
     NORWAY = "NORWAY"
