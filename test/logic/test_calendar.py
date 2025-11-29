@@ -5,7 +5,7 @@ import pytest
 
 from schedules.logic import objects
 from schedules.logic.calendar import FullCalendar, SinglePersonCalendar
-from schedules.logic.errors import CalendarError, RequestError
+from schedules.logic.errors import CalendarError
 from schedules.logic.objects import Country, Day, Location, Person, StrID, Trip
 from schedules.logic.requests import REQUEST_TYPE_ID, RequestType
 
