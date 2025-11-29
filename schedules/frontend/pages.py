@@ -15,21 +15,6 @@ def home() -> str:
     app = cast(AppWithCalendar, current_app)
     response = Response(code=200, message="Ready")
 
-    # TODO: DO NOT MERGE
-    person = objects.Person(
-        last_name=objects.StrID("hilbers"),
-        first_name=objects.StrID("adriaan"),
-        home=objects.Location(objects.Country.SWITZERLAND, city=objects.StrID("zurich")),
-    )
-    if person not in app.calendar.calendars.keys():
-        app.calendar._add_person(
-            objects.Person(
-                last_name=objects.StrID("hilbers"),
-                first_name=objects.StrID("adriaan"),
-                home=objects.Location(objects.Country.SWITZERLAND, city=objects.StrID("zurich")),
-            )
-        )
-
     if flask_request.method == "POST":
         response = app.calendar.process_frontend_request(flask_request.form.to_dict())
     return render_template(
