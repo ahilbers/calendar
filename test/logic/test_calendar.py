@@ -1,10 +1,8 @@
 import datetime as dt
 from typing import Any
-from typing import Any
 
 import pytest
 
-from schedules.logic import objects
 from schedules.logic import objects
 from schedules.logic.calendar import FullCalendar, SinglePersonCalendar
 from schedules.logic.errors import CalendarError
