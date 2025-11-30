@@ -47,7 +47,7 @@ class Location:
 
     @property
     def display_name_frontend(self) -> str:
-        return f"{self.city.title()}, {self.country.title()}"
+        return f"{self.city.title()}, {self.country.title().replace('_', ' ')}"
 
 
 @dataclasses.dataclass(frozen=True)
@@ -70,7 +70,7 @@ class Person:
 
     @property
     def display_name_frontend(self) -> str:
-        return f"{self.last_name.title()}, {self.first_name.title()}"
+        return f"{self.first_name.title()} {self.last_name.title()}"
 
     @property
     def unique_id(self) -> int:

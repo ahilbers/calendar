@@ -1,9 +1,15 @@
-/* General settings */
+/* General document settings */
 body {
     background-color: #fbfbfb;
     font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    color: #444444;
+    text-transform: lowercase;
     margin: 0px 0px;
     padding: 0px 0px 48px 0px;
+    font-size: 16px;
+}
+.body-container {
+    padding: 10px 10px;
 }
 
 /* Non-body */
@@ -28,18 +34,57 @@ h1 {
     padding: 0px 5px;
 }
 
-/* Body elements */
-.body-container {
-    padding: 10px 10px;
-}
+/* Body widgets */
 .body-widget-container {
     border: 1px solid #666666;
-    border-radius: 8px;
+    border-radius: 6px;
+    width: 360px;
 }
-.body-widget-title {
+.body-widget-header {
     background-color: royalblue;
-    font-size: 18px;
+    font-size: 20px;
     color: white;
-    padding: 5px 10px 5px 10px;
-    border-radius: 6px 6px 0px 0px;
+    padding: 2px 6px 2px 6px;
+    border-radius: 4px 4px 0px 0px;
+}
+.body-widget-element {
+    padding: 0px 0px;
+}
+.body-widget-body {
+    padding: 6px 6px;
+}
+.body-widget-footer {
+    display: flex;
+    gap: 8px;
+    background-color: #dddddd;
+    color: white;
+    padding: 6px 6px 6px 6px;
+    border-radius: 0px 0px 4px 4px;
+}
+
+/* Repeated base style */
+table, th, td {
+    text-align: left;
+    margin-bottom: 0px;
+    padding: 0px 0px;
+    border-collapse: collapse;
+}
+th, td {
+    border-bottom: 1px solid #cccccc;
+    padding: 2px 6px;
+    width: 180px;
+}
+th {
+    background-color: #dddddd;
+    color: black;
+}
+button {
+    background: #888888;
+    color: white;
+    border: 0px;
+    border-radius: 6px;
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    text-transform: lowercase;
+    font-size: 16px;
+    padding: 0px 4px 0px 4px;
 }
