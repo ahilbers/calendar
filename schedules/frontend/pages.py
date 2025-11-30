@@ -16,19 +16,19 @@ def home() -> str:
     response = Response(code=200, message="Ready")
 
     # TODO: DO NOT MERGE
-    person = objects.Person(
+    person_1 = objects.Person(
         last_name=objects.StrID("hilbers"),
         first_name=objects.StrID("adriaan"),
         home=objects.Location(objects.Country.SWITZERLAND, city=objects.StrID("zurich")),
     )
-    if person not in app.calendar.calendars.keys():
-        app.calendar._add_person(
-            objects.Person(
-                last_name=objects.StrID("hilbers"),
-                first_name=objects.StrID("adriaan"),
-                home=objects.Location(objects.Country.SWITZERLAND, city=objects.StrID("zurich")),
-            )
-        )
+    person_2 = objects.Person(
+        last_name=objects.StrID("thorsdottir"),
+        first_name=objects.StrID("eva"),
+        home=objects.Location(objects.Country.NORWAY, city=objects.StrID("oslo")),
+    )
+    for person in [person_1, person_2]:
+        if person not in app.calendar.calendars.keys():
+            app.calendar._add_person(person)
 
     if flask_request.method == "POST":
         response = app.calendar.process_frontend_request(flask_request.form.to_dict())

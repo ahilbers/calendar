@@ -11,108 +11,112 @@
         <h1>when will i see my friends?</h1>
     </div>
 
-    {# Calendar Members #}
-    <div>
-        <h2>Calendar Members</h2>
-        <table>
-            <thead>
-                <tr> <th>Name</th> <th>Home</th> </tr>
-            </thead>
-            <tbody>
-                {% for single_person_calendar in calendar.single_person_calendars %}
-                    <tr>
-                        <td> {{ single_person_calendar.person.display_name_frontend }} </td>
-                        <td> {{ single_person_calendar.person.home.display_name_frontend }} </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="body-container"">
 
-        {# Button to clear all people #}
-        <form method="post">
-            <input type="hidden" name="request_type" value={{ RequestType.CLEAR_ALL_PEOPLE }}>
-            <button type="submit">Clear All Members</button>
-        </form>
-    </div>
-
-    {# Form: Add person #}
-    <div>
-        <h2>Add Person</h2>
-        <form method="post">
-            <input type="hidden" name="request_type" value={{ RequestType.ADD_PERSON }}>
-
-            {# Free field for last and first name #}
-            <label style="display:block; margin-bottom:10px;">
-                Last Name: <input type="text" name="last_name">
-            </label>
-            <label style="display:block; margin-bottom:10px">
-                First Name: <input type="text" name="first_name">
-            </label>
-
-            {# Drop-down list for home country, free field for home city #}
-            <label style="display:block; margin-bottom:10px">
-                Country:
-                <select id="country", name="country">
-                    {% for c in objects.Country %}
-                        <option value="{{ c.name }}">{{ c.value.replace("_", " ").title() }}</option>
-                    {% endfor %}
-                </select>
-            </label>
-            <label style="display:block; margin-bottom:10px">
-                City: <input type="text" name="city">
-            </label>
-
-            {# Submit button #}
-            <button type="submit">Submit</button>
-        </form>
-
-        {# Button to clear all people #}
-        <form method="post">
-            <input type="hidden" name="request_type" value={{ RequestType.CLEAR_ALL_PEOPLE }}>
-            <button type="submit">Clear</button>
-        </form>
-    </div>
-
-    {# Form: Add Trip #}
-    <div>
-        <h2>Add Trip</h2>
-        <form method="post">
-            <input type="hidden" name="request_type" value={{ RequestType.ADD_TRIP }}>
-
-            {# Drop-down list for person #}
-            <label style="display:block; margin-bottom:10px">
-                Person:
-                <select id="person_id", name="person_id">
+        {# Calendar Members #}
+        <div class="body-widget-container">
+            <div class="body-widget-title">calendar members</div>
+            <table>
+                <thead>
+                    <tr> <th>Name</th> <th>Home</th> </tr>
+                </thead>
+                <tbody>
                     {% for single_person_calendar in calendar.single_person_calendars %}
-                        <option value="{{ single_person_calendar.person.unique_id }}">
-                            {{ single_person_calendar.person.display_name_frontend }}
-                        </option>
+                        <tr>
+                            <td> {{ single_person_calendar.person.display_name_frontend }} </td>
+                            <td> {{ single_person_calendar.person.home.display_name_frontend }} </td>
+                        </tr>
                     {% endfor %}
-                </select>
-            </label>
+                </tbody>
+            </table>
 
-            {# Drop-down list for home country, free field for home city #}
-            <label style="display:block; margin-bottom:10px">
-                Country:
-                <select id="country", name="country">
-                    {% for c in objects.Country %}
-                        <option value="{{ c.name }}">{{ c.value.replace("_", " ").title() }}</option>
-                    {% endfor %}
-                </select>
-            </label>
-            <label style="display:block; margin-bottom:10px">
-                City: <input type="text" name="city">
-            </label>
-            <label style="display:block; margin-bottom:10px;">
-                Start: <input type="date" name="start_date">
-            </label>
-            <label style="display:block; margin-bottom:10px;">
-                End: <input type="date" name="end_date">
-            </label>
+            {# Button to clear all people #}
+            <form method="post">
+                <input type="hidden" name="request_type" value={{ RequestType.CLEAR_ALL_PEOPLE }}>
+                <button type="submit">Clear All Members</button>
+            </form>
+        </div>
 
-            {# Submit button #}
-            <button type="submit">Submit</button>
-        </form>
+        {# Form: Add person #}
+        <div>
+            <h2>Add Person</h2>
+            <form method="post">
+                <input type="hidden" name="request_type" value={{ RequestType.ADD_PERSON }}>
+
+                {# Free field for last and first name #}
+                <label style="display:block; margin-bottom:10px;">
+                    Last Name: <input type="text" name="last_name">
+                </label>
+                <label style="display:block; margin-bottom:10px">
+                    First Name: <input type="text" name="first_name">
+                </label>
+
+                {# Drop-down list for home country, free field for home city #}
+                <label style="display:block; margin-bottom:10px">
+                    Country:
+                    <select id="country", name="country">
+                        {% for c in objects.Country %}
+                            <option value="{{ c.name }}">{{ c.value.replace("_", " ").title() }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label style="display:block; margin-bottom:10px">
+                    City: <input type="text" name="city">
+                </label>
+
+                {# Submit button #}
+                <button type="submit">Submit</button>
+            </form>
+
+            {# Button to clear all people #}
+            <form method="post">
+                <input type="hidden" name="request_type" value={{ RequestType.CLEAR_ALL_PEOPLE }}>
+                <button type="submit">Clear</button>
+            </form>
+        </div>
+
+        {# Form: Add Trip #}
+        <div>
+            <h2>Add Trip</h2>
+            <form method="post">
+                <input type="hidden" name="request_type" value={{ RequestType.ADD_TRIP }}>
+
+                {# Drop-down list for person #}
+                <label style="display:block; margin-bottom:10px">
+                    Person:
+                    <select id="person_id", name="person_id">
+                        {% for single_person_calendar in calendar.single_person_calendars %}
+                            <option value="{{ single_person_calendar.person.unique_id }}">
+                                {{ single_person_calendar.person.display_name_frontend }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </label>
+
+                {# Drop-down list for home country, free field for home city #}
+                <label style="display:block; margin-bottom:10px">
+                    Country:
+                    <select id="country", name="country">
+                        {% for c in objects.Country %}
+                            <option value="{{ c.name }}">{{ c.value.replace("_", " ").title() }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label style="display:block; margin-bottom:10px">
+                    City: <input type="text" name="city">
+                </label>
+                <label style="display:block; margin-bottom:10px;">
+                    Start: <input type="date" name="start_date">
+                </label>
+                <label style="display:block; margin-bottom:10px;">
+                    End: <input type="date" name="end_date">
+                </label>
+
+                {# Submit button #}
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+
     </div>
 
     {# Status messages #}
