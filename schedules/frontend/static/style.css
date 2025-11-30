@@ -1,4 +1,4 @@
-/* General document settings */
+/* general settings */
 body {
     background-color: #fbfbfb;
     font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
@@ -12,7 +12,7 @@ body {
     padding: 10px 10px;
 }
 
-/* Non-body */
+/* non-body */
 .title-container {
     background-color: royalblue;
     border-bottom: 2px solid black;
@@ -34,11 +34,12 @@ h1 {
     padding: 0px 5px;
 }
 
-/* Body widgets */
+/* body widgets */
 .body-widget-container {
     border: 1px solid #666666;
     border-radius: 6px;
-    width: 360px;
+    width: 400px;
+    margin: 0px 0px 10px 0px;
 }
 .body-widget-header {
     background-color: royalblue;
@@ -55,14 +56,26 @@ h1 {
 }
 .body-widget-footer {
     display: flex;
-    gap: 8px;
     background-color: #dddddd;
     color: white;
+    justify-content: flex-end;
     padding: 6px 6px 6px 6px;
     border-radius: 0px 0px 4px 4px;
 }
 
-/* Repeated base style */
+/* re-used elements */
+button {
+    background: royalblue;
+    color: white;
+    border: 0px;
+    border-radius: 6px;
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    text-transform: lowercase;
+    font-size: 16px;
+    padding: 0px 4px 0px 4px;
+}
+
+/* calendar members table */
 table, th, td {
     text-align: left;
     margin-bottom: 0px;
@@ -72,19 +85,24 @@ table, th, td {
 th, td {
     border-bottom: 1px solid #cccccc;
     padding: 2px 6px;
-    width: 180px;
+    width: 200px;
 }
 th {
     background-color: #dddddd;
     color: black;
 }
-button {
-    background: #888888;
-    color: white;
-    border: 0px;
-    border-radius: 6px;
-    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
-    text-transform: lowercase;
-    font-size: 16px;
-    padding: 0px 4px 0px 4px;
+
+/* add person form */
+.form-row {
+    display: flex;
+    margin: 6px 0px;
+}
+.form-row label {
+    width: 100px;
+    text-align: right;
+    margin: 0px 10px;
+}
+.form-row input, .form-row select {
+    width: 200px;
+    box-sizing: border-box;
 }

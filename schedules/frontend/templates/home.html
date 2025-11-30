@@ -41,44 +41,48 @@
                     <button type="submit">Clear All</button>
                 </form>
             </div>
-
         </div>
 
-        {# Form: Add person #}
-        <div>
-            <h2>Add Person</h2>
+        {# add person #}
+        <div class="body-widget-container">
+            <div class="body-widget-header">Add Person</div>
+
             <form method="post">
                 <input type="hidden" name="request_type" value={{ RequestType.ADD_PERSON }}>
 
-                {# Free field for last and first name #}
-                <label style="display:block; margin-bottom:10px;">
-                    Last Name: <input type="text" name="last_name">
-                </label>
-                <label style="display:block; margin-bottom:10px">
-                    First Name: <input type="text" name="first_name">
-                </label>
+                <div class="body-widget-body">
 
-                {# Drop-down list for home country, free field for home city #}
-                <label style="display:block; margin-bottom:10px">
-                    Country:
-                    <select id="country", name="country">
-                        {% for c in objects.Country %}
-                            <option value="{{ c.name }}">{{ c.value.replace("_", " ").title() }}</option>
-                        {% endfor %}
-                    </select>
-                </label>
-                <label style="display:block; margin-bottom:10px">
-                    City: <input type="text" name="city">
-                </label>
+                    {# Free field for last and first name #}
+                    <div class="form-row">
+                        <label for="add_person_last_name"> Last Name </label>
+                        <input type="text" id="add_person_last_name" name="last_name"> 
+                    </div>
+                    <div class="form-row">
+                        <label for="add_person_first_name"> First Name </label>
+                        <input type="text" id="add_person_first_name" name="first_name"> 
+                    </div>
+
+                    {# Drop-down list for home country, free field for home city #}
+                    <div class="form-row">
+                        <label for="add_person_country"> Country </label>
+                        <select id="country", id="add_person_country" name="country">
+                            {% for c in objects.Country %}
+                                <option value="{{ c.name }}">{{ c.value.replace("_", " ").title() }} </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label for="add_person_city"> City </label>
+                        <input type="text" id="add_person_city" name="city"> 
+                    </div>
+
+                </div>
 
                 {# Submit button #}
-                <button type="submit">Submit</button>
-            </form>
-
-            {# Button to clear all people #}
-            <form method="post">
-                <input type="hidden" name="request_type" value={{ RequestType.CLEAR_ALL_PEOPLE }}>
-                <button type="submit">Clear</button>
+                <div class="body-widget-footer">
+                    <button type="submit">Submit</button>
+                </div>
+            
             </form>
         </div>
 
