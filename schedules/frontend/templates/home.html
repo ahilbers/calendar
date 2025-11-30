@@ -3,15 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Friend Calendar</title>
-    <style>
-        body {
-            font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
-        }
-    </style>
+    <title>when will i see my friends?</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
 </head>
 <body>
-    <h1>Friend Calendar</h1>
+    <div class="title-container">
+        <h1>when will i see my friends?</h1>
+    </div>
 
     {# Calendar Members #}
     <div>
@@ -118,9 +116,9 @@
     </div>
 
     {# Status messages #}
-    <div>
-        <h2>Status</h2>
-        <div class="error"> {{ response.frontend_message }} </div>
+    <div class="status-message-container">
+        <span class="status-label">Status:</span>
+        <span class="status-message"> {{ response.frontend_message }} </span>
     </div>
 </body>
 </html>
