@@ -1,0 +1,108 @@
+/* general settings */
+body {
+    background-color: #fbfbfb;
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    color: #444444;
+    text-transform: lowercase;
+    margin: 0px 0px;
+    padding: 0px 0px 48px 0px;
+    font-size: 16px;
+}
+.body-container {
+    padding: 10px 10px;
+}
+
+/* non-body */
+.title-container {
+    background-color: royalblue;
+    border-bottom: 2px solid black;
+    padding: 5px 0px 5px 5px;
+}
+.status-message-container {
+    position: fixed;
+    bottom: 0px;
+    width: 100vw;
+    background-color: #fbfbfb;
+    border-top: 2px solid black;
+    padding: 2px 10px;
+    z-index: 100;
+}
+h1 {
+    display: inline-block;
+    color: white;
+    margin: 0;
+    padding: 0px 5px;
+}
+
+/* body widgets */
+.body-widget-container {
+    border: 1px solid #666666;
+    border-radius: 6px;
+    width: 400px;
+    margin: 0px 0px 10px 0px;
+}
+.body-widget-header {
+    background-color: royalblue;
+    font-size: 20px;
+    color: white;
+    padding: 2px 6px 2px 6px;
+    border-radius: 4px 4px 0px 0px;
+}
+.body-widget-element {
+    padding: 0px 0px;
+}
+.body-widget-body {
+    padding: 6px 6px;
+}
+.body-widget-footer {
+    display: flex;
+    background-color: #dddddd;
+    color: white;
+    justify-content: flex-end;
+    padding: 6px 6px 6px 6px;
+    border-radius: 0px 0px 4px 4px;
+}
+
+/* re-used elements */
+button {
+    background: royalblue;
+    color: white;
+    border: 0px;
+    border-radius: 6px;
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    text-transform: lowercase;
+    font-size: 16px;
+    padding: 0px 4px 0px 4px;
+}
+
+/* calendar members table */
+table, th, td {
+    text-align: left;
+    margin-bottom: 0px;
+    padding: 0px 0px;
+    border-collapse: collapse;
+}
+th, td {
+    border-bottom: 1px solid #cccccc;
+    padding: 2px 6px;
+    width: 200px;
+}
+th {
+    background-color: #dddddd;
+    color: black;
+}
+
+/* add person form */
+.form-row {
+    display: flex;
+    margin: 6px 0px;
+}
+.form-row label {
+    width: 100px;
+    text-align: right;
+    margin: 0px 10px;
+}
+.form-row input, .form-row select {
+    width: 200px;
+    box-sizing: border-box;
+}

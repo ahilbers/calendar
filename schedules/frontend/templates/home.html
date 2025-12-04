@@ -3,124 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Friend Calendar</title>
-    <style>
-        body {
-            font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
-        }
-    </style>
+    <title>when will i see my friends?</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
 </head>
 <body>
-    <h1>Friend Calendar</h1>
-
-    {# Calendar Members #}
-    <div>
-        <h2>Calendar Members</h2>
-        <table>
-            <thead>
-                <tr> <th>Name</th> <th>Home</th> </tr>
-            </thead>
-            <tbody>
-                {% for single_person_calendar in calendar.single_person_calendars %}
-                    <tr>
-                        <td> {{ single_person_calendar.person.display_name_frontend }} </td>
-                        <td> {{ single_person_calendar.person.home.display_name_frontend }} </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        {# Button to clear all people #}
-        <form method="post">
-            <input type="hidden" name="request_type" value={{ RequestType.CLEAR_ALL_PEOPLE }}>
-            <button type="submit">Clear All Members</button>
-        </form>
+    <div class="title-container">
+        <h1>When Will I See My Friends?</h1>
     </div>
 
-    {# Form: Add person #}
-    <div>
-        <h2>Add Person</h2>
-        <form method="post">
-            <input type="hidden" name="request_type" value={{ RequestType.ADD_PERSON }}>
+    <div class="body-container"">
 
-            {# Free field for last and first name #}
-            <label style="display:block; margin-bottom:10px;">
-                Last Name: <input type="text" name="last_name">
-            </label>
-            <label style="display:block; margin-bottom:10px">
-                First Name: <input type="text" name="first_name">
-            </label>
+        {# calendar members #}
+        <div class="body-widget-container">
+            <div class="body-widget-header">Calendar Members</div>
 
-            {# Drop-down list for home country, free field for home city #}
-            <label style="display:block; margin-bottom:10px">
-                Country:
-                <select id="country", name="country">
-                    {% for c in objects.Country %}
-                        <option value="{{ c.name }}">{{ c.value.replace("_", " ").title() }}</option>
-                    {% endfor %}
-                </select>
-            </label>
-            <label style="display:block; margin-bottom:10px">
-                City: <input type="text" name="city">
-            </label>
+            {# table with calendar members #}
+            <div class="body-widget-element">    
+                <table>
+                    <thead>
+                        <tr> <th>Name</th> <th>Home</th> </tr>
+                    </thead>
+                    <tbody>
+                        {% for single_person_calendar in calendar.single_person_calendars %}
+                            <tr>
+                                <td> {{ single_person_calendar.person.display_name_frontend }} </td>
+                                <td> {{ single_person_calendar.person.home.display_name_frontend }} </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
 
-            {# Submit button #}
-            <button type="submit">Submit</button>
-        </form>
+            {# buttons and actions #}
+            <div class="body-widget-footer">
+                <form method="post">
+                    <input type="hidden" name="request_type" value={{ RequestType.CLEAR_ALL_PEOPLE }}>
+                    <button type="submit">Clear All</button>
+                </form>
+            </div>
+        </div>
 
-        {# Button to clear all people #}
-        <form method="post">
-            <input type="hidden" name="request_type" value={{ RequestType.CLEAR_ALL_PEOPLE }}>
-            <button type="submit">Clear</button>
-        </form>
-    </div>
+        {# add person #}
+        <div class="body-widget-container">
+            <div class="body-widget-header">Add Person</div>
 
-    {# Form: Add Trip #}
-    <div>
-        <h2>Add Trip</h2>
-        <form method="post">
-            <input type="hidden" name="request_type" value={{ RequestType.ADD_TRIP }}>
+            <form method="post">
+                <input type="hidden" name="request_type" value={{ RequestType.ADD_PERSON }}>
 
-            {# Drop-down list for person #}
-            <label style="display:block; margin-bottom:10px">
-                Person:
-                <select id="person_id", name="person_id">
-                    {% for single_person_calendar in calendar.single_person_calendars %}
-                        <option value="{{ single_person_calendar.person.unique_id }}">
-                            {{ single_person_calendar.person.display_name_frontend }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </label>
+                <div class="body-widget-body">
 
-            {# Drop-down list for home country, free field for home city #}
-            <label style="display:block; margin-bottom:10px">
-                Country:
-                <select id="country", name="country">
-                    {% for c in objects.Country %}
-                        <option value="{{ c.name }}">{{ c.value.replace("_", " ").title() }}</option>
-                    {% endfor %}
-                </select>
-            </label>
-            <label style="display:block; margin-bottom:10px">
-                City: <input type="text" name="city">
-            </label>
-            <label style="display:block; margin-bottom:10px;">
-                Start: <input type="date" name="start_date">
-            </label>
-            <label style="display:block; margin-bottom:10px;">
-                End: <input type="date" name="end_date">
-            </label>
+                    {# Free field for last and first name #}
+                    <div class="form-row">
+                        <label for="add_person_last_name"> Last Name </label>
+                        <input type="text" id="add_person_last_name" name="last_name"> 
+                    </div>
+                    <div class="form-row">
+                        <label for="add_person_first_name"> First Name </label>
+                        <input type="text" id="add_person_first_name" name="first_name"> 
+                    </div>
 
-            {# Submit button #}
-            <button type="submit">Submit</button>
-        </form>
+                    {# Drop-down list for home country, free field for home city #}
+                    <div class="form-row">
+                        <label for="add_person_country"> Country </label>
+                        <select id="country", id="add_person_country" name="country">
+                            {% for c in objects.Country %}
+                                <option value="{{ c.name }}">{{ c.value.replace("_", " ").title() }} </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label for="add_person_city"> City </label>
+                        <input type="text" id="add_person_city" name="city"> 
+                    </div>
+
+                </div>
+
+                {# submit button #}
+                <div class="body-widget-footer">
+                    <button type="submit">Submit</button>
+                </div>
+            
+            </form>
+        </div>
+
+        {# add trip #}
+        <div class="body-widget-container">
+            <div class="body-widget-header">Add Trip</div>
+
+            <form method="post">
+                <input type="hidden" name="request_type" value={{ RequestType.ADD_TRIP }}>
+
+                <div class="body-widget-body">
+
+                    {# drop-down list for person #}
+                    <div class="form-row">
+                        <label for="add_trip_person"> Person </label>
+                        <select id="add_trip_person", name="person_id">
+                            {% for single_person_calendar in calendar.single_person_calendars %}
+                                <option value="{{ single_person_calendar.person.unique_id }}">
+                                    {{ single_person_calendar.person.display_name_frontend }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {# drop-down list for country, free field for city #}
+                    <div class="form-row">
+                        <label for="add_trip_country"> Country </label>
+                        <select id="add_trip_country" name="country">
+                            {% for c in objects.Country %}
+                                <option value="{{ c.name }}">{{ c.value.replace("_", " ").title() }} </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label for="add_trip_city"> City </label>
+                        <input type="text" id="add_trip_city" name="city">
+                    </div>
+
+                    {# date picker for dates #}
+                    <div class="form-row">
+                        <label for="add_trip_start_date"> Start </label>
+                        <input type="date" id="add_trip_start_date" name="start_date">
+                    </div>
+                    <div class="form-row">
+                        <label for="add_trip_end_date"> End </label>
+                        <input type="date" id="add_trip_start_date" name="end_date">
+                    </div>
+
+                </div>
+
+                {# submit button #}
+                <div class="body-widget-footer">
+                    <button type="submit">Submit</button>
+                </div>
+            
+            </form>
+        </div>
+
     </div>
 
     {# Status messages #}
-    <div>
-        <h2>Status</h2>
-        <div class="error"> {{ response.frontend_message }} </div>
+    <div class="status-message-container">
+        <span class="status-label">Status:</span>
+        <span class="status-message"> {{ response.frontend_message }} </span>
     </div>
 </body>
 </html>
