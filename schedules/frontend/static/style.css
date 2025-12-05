@@ -40,7 +40,6 @@ h1 {
 .body-widget-container {
     border: 1px solid #666666;
     border-radius: 6px;
-    width: 400px;
     margin: 0px 0px 10px 0px;
 }
 .body-widget-header {
@@ -77,24 +76,23 @@ button {
     padding: 0px 4px 0px 4px;
 }
 
-/* calendar members table */
+/* tables */
 table, th, td {
     text-align: left;
     margin-bottom: 0px;
     padding: 0px 0px;
     border-collapse: collapse;
-}
-th, td {
     border-bottom: 1px solid #cccccc;
     padding: 2px 6px;
-    width: 200px;
 }
 th {
     background-color: #dddddd;
-    color: black;
+}
+.calendar-members-table th, .calendar-members-table td {
+    width: 180px;
 }
 
-/* add person form */
+/* forms */
 .form-row {
     display: flex;
     margin: 6px 0px;

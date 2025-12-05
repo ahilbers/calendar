@@ -21,7 +21,7 @@
 
                 {# table with calendar members #}
                 <div class="body-widget-element">    
-                    <table>
+                    <table class="calendar-members-table">
                         <thead>
                             <tr> <th>Name</th> <th>Home</th> </tr>
                         </thead>
@@ -150,7 +150,34 @@
             {# calendars #}
             <div class="body-widget-container">
                 <div class="body-widget-header"> Daily Calendars </div>
+                <div class="body-widget-element">    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                {% for person in calendar.people_sorted_by_name %}
+                                    <th> {{ person.display_name_frontend }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for day, people_days in calendar.get_daily_calendars().items() %}
+                                <tr>
+                                    <td> {{ day }} </td>
+                                    {% for people_day in people_days.values() %}
+                                        <td> {{ people_day.end.display_name_frontend }} </td>
+                                    {% endfor %}
+                                    {# <td> {{ single_person_calendar.person.display_name_frontend }} </td>
+                                    <td> {{ single_person_calendar.person.home.display_name_frontend }} </td> #}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
             </div>
+
+
         
         </div>
 

@@ -1,8 +1,9 @@
 """The calendar, which holds one person's schedule."""
 
 import datetime as dt
+import functools
 import logging
-from typing import Any, Mapping, MutableMapping, Set
+from typing import Any, Iterable, Mapping, MutableMapping, OrderedDict, Set
 
 from schedules.logic.requests import Request, RequestType, Response
 from schedules.logic.errors import CalendarBaseException, CalendarError, RequestError
@@ -119,12 +120,16 @@ class FullCalendar:
     def __init__(self) -> None:
         self.calendars: MutableMapping[Person, SinglePersonCalendar] = dict()
         self._id_to_person: MutableMapping[int, Person] = dict()
+        self._people_sorted_cache: Iterable[Person] | None = None
+        self._daily_calendars_cache: OrderedDict[dt.date, MutableMapping[Person, Day]] | None = None
 
     def _add_person(self, person: Person) -> None:
         if person in self.calendars.keys():
             raise CalendarError(f"Person {person} is already in calendar.")
         self.calendars[person] = SinglePersonCalendar(person)
         self._id_to_person[hash(person)] = person
+        self._people_sorted_cache = None  # Needs to be recalculated
+        self._daily_calendars_cache = None  # Needs to be recalculated
         logging.info("Added %s to calendar", person)
 
     def _clear_all_people(self) -> None:
@@ -133,6 +138,7 @@ class FullCalendar:
 
     def _add_trip(self, person: Person, trip: Trip) -> None:
         self.calendars[person].add_trip(trip)
+        self.daily_calendars_cache = None  # Needs to be recalculated
         logging.info(f"Added {trip} to calendar for {person}.")
 
     def process_frontend_request(self, request_raw: Mapping[str, Any]) -> Response:
@@ -167,7 +173,27 @@ class FullCalendar:
         return Response(code=400, message=f"Unknown request type: {request.request_type}.")
 
     @property
+    def people_sorted_by_name(self) -> Iterable[Person]:
+        if not self._people_sorted_cache:
+            self._people_sorted_cache = sorted(
+                self.calendars.keys(), key=lambda person: (person.last_name, person.first_name)
+            )
+        return self._people_sorted_cache
+
+    @property
     def single_person_calendars(self) -> list[SinglePersonCalendar]:
         """Get list of single-person calendars, sorted by name."""
-        people_sorted = sorted(self.calendars.keys(), key=lambda person: (person.last_name, person.first_name))
-        return [self.calendars[person] for person in people_sorted]
+        return [self.calendars[person] for person in self.people_sorted_by_name]
+
+    def get_daily_calendars(self) -> OrderedDict[dt.date, MutableMapping[Person, Day]]:
+        """Get daily calendars for all calendar members in format that can be used by frontend."""
+        start_date = dt.date(2025, 12, 1)
+        end_date = dt.date(2025, 12, 5)
+        days = [start_date + dt.timedelta(days=i) for i in range((end_date - start_date).days + 1)]
+        daily_calendars = {
+            person: self.calendars[person].get_daily_calendar(start_date, end_date)
+            for person in self.people_sorted_by_name
+        }
+        return OrderedDict(
+            {day: {person: daily_calendars[person][day] for person in self.people_sorted_by_name} for day in days}
+        )

@@ -244,3 +244,21 @@ class TestFullCalendar:
         assert trip.location == Location(Country.NETHERLANDS, city=StrID("Amsterdam"))
         assert trip.start_date == dt.date(2025, 11, 25)
         assert trip.end_date == dt.date(2025, 11, 28)
+
+    def test_get_all_calendars(self):
+        person_1_request = self.add_person_request.copy()
+        person_2_request: dict[str, Any] = {
+            REQUEST_TYPE_ID: RequestType.ADD_PERSON,
+            "last_name": "familyname",
+            "first_name": "givenname",
+            "country": objects.Country.UNITED_KINGDOM.name,
+            "city": "London",
+        }
+        _ = self.calendar.process_frontend_request(person_1_request)
+        _ = self.calendar.process_frontend_request(person_2_request)
+
+        calendars = self.calendar.get_daily_calendars(dt.date(2025, 12, 1), dt.date(2025, 12, 5))
+
+        # assert people[0].last_name == StrID("familyname")
+        # assert people[1].last_name == StrID("lastname")
+        # breakpoint()
