@@ -13,132 +13,184 @@
 
     <div class="body-container"">
 
-        {# calendar members #}
-        <div class="body-widget-container">
-            <div class="body-widget-header">Calendar Members</div>
+        <div class="body-column-1">
 
-            {# table with calendar members #}
-            <div class="body-widget-element">    
-                <table>
-                    <thead>
-                        <tr> <th>Name</th> <th>Home</th> </tr>
-                    </thead>
-                    <tbody>
-                        {% for single_person_calendar in calendar.single_person_calendars %}
-                            <tr>
-                                <td> {{ single_person_calendar.person.display_name_frontend }} </td>
-                                <td> {{ single_person_calendar.person.home.display_name_frontend }} </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            {# calendar members #}
+            <div class="body-widget-container">
+                <div class="body-widget-header">Calendar Members</div>
+
+                {# table with calendar members #}
+                <div class="body-widget-element">    
+                    <table class="calendar-members-table">
+                        <thead>
+                            <tr> <th>Name</th> <th>Home</th> </tr>
+                        </thead>
+                        <tbody>
+                            {% for single_person_calendar in calendar.single_person_calendars %}
+                                <tr>
+                                    <td> {{ single_person_calendar.person.display_name_frontend }} </td>
+                                    <td> {{ single_person_calendar.person.home.display_name_frontend }} </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {# buttons and actions #}
+                <div class="body-widget-footer">
+                    <form method="post">
+                        <input type="hidden" name="request_type" value={{ RequestType.CLEAR_ALL_PEOPLE }}>
+                        <button type="submit">Clear All</button>
+                    </form>
+                </div>
             </div>
 
-            {# buttons and actions #}
-            <div class="body-widget-footer">
+            {# add person #}
+            <div class="body-widget-container">
+                <div class="body-widget-header">Add Person</div>
+
                 <form method="post">
-                    <input type="hidden" name="request_type" value={{ RequestType.CLEAR_ALL_PEOPLE }}>
-                    <button type="submit">Clear All</button>
+                    <input type="hidden" name="request_type" value={{ RequestType.ADD_PERSON }}>
+
+                    <div class="body-widget-body">
+
+                        {# Free field for last and first name #}
+                        <div class="form-row">
+                            <label for="add_person_last_name"> Last Name </label>
+                            <input type="text" id="add_person_last_name" name="last_name"> 
+                        </div>
+                        <div class="form-row">
+                            <label for="add_person_first_name"> First Name </label>
+                            <input type="text" id="add_person_first_name" name="first_name"> 
+                        </div>
+
+                        {# Drop-down list for home country, free field for home city #}
+                        <div class="form-row">
+                            <label for="add_person_country"> Country </label>
+                            <select id="country", id="add_person_country" name="country">
+                                {% for c in objects.Country %}
+                                    <option value="{{ c.name }}">{{ c.name.replace("_", " ").title() }} </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label for="add_person_city"> City </label>
+                            <input type="text" id="add_person_city" name="city"> 
+                        </div>
+
+                    </div>
+
+                    {# submit button #}
+                    <div class="body-widget-footer">
+                        <button type="submit">Submit</button>
+                    </div>
+                
                 </form>
             </div>
+
+            {# add trip #}
+            <div class="body-widget-container">
+                <div class="body-widget-header">Add Trip</div>
+
+                <form method="post">
+                    <input type="hidden" name="request_type" value={{ RequestType.ADD_TRIP }}>
+
+                    <div class="body-widget-body">
+
+                        {# drop-down list for person #}
+                        <div class="form-row">
+                            <label for="add_trip_person"> Person </label>
+                            <select id="add_trip_person", name="person_id">
+                                {% for single_person_calendar in calendar.single_person_calendars %}
+                                    <option value="{{ single_person_calendar.person.unique_id }}">
+                                        {{ single_person_calendar.person.display_name_frontend }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        {# drop-down list for country, free field for city #}
+                        <div class="form-row">
+                            <label for="add_trip_country"> Country </label>
+                            <select id="add_trip_country" name="country">
+                                {% for c in objects.Country %}
+                                    <option value="{{ c.name }}">{{ c.name.replace("_", " ").title() }} </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label for="add_trip_city"> City </label>
+                            <input type="text" id="add_trip_city" name="city">
+                        </div>
+
+                        {# date picker for dates #}
+                        <div class="form-row">
+                            <label for="add_trip_start_date"> Start </label>
+                            <input type="date" id="add_trip_start_date" name="start_date">
+                        </div>
+                        <div class="form-row">
+                            <label for="add_trip_end_date"> End </label>
+                            <input type="date" id="add_trip_start_date" name="end_date">
+                        </div>
+
+                    </div>
+
+                    {# submit button #}
+                    <div class="body-widget-footer">
+                        <button type="submit">Submit</button>
+                    </div>
+                
+                </form>
+            
+            </div>
         </div>
 
-        {# add person #}
-        <div class="body-widget-container">
-            <div class="body-widget-header">Add Person</div>
+        <div class="body-column-2">
 
-            <form method="post">
-                <input type="hidden" name="request_type" value={{ RequestType.ADD_PERSON }}>
-
-                <div class="body-widget-body">
-
-                    {# Free field for last and first name #}
-                    <div class="form-row">
-                        <label for="add_person_last_name"> Last Name </label>
-                        <input type="text" id="add_person_last_name" name="last_name"> 
-                    </div>
-                    <div class="form-row">
-                        <label for="add_person_first_name"> First Name </label>
-                        <input type="text" id="add_person_first_name" name="first_name"> 
-                    </div>
-
-                    {# Drop-down list for home country, free field for home city #}
-                    <div class="form-row">
-                        <label for="add_person_country"> Country </label>
-                        <select id="country", id="add_person_country" name="country">
-                            {% for c in objects.Country %}
-                                <option value="{{ c.name }}">{{ c.value.replace("_", " ").title() }} </option>
+            {# calendars #}
+            <div class="body-widget-container">
+                <div class="body-widget-header calendars-header">
+                    <span> Daily Calendars </span>
+                    
+                </div>
+                <div class="body-widget-body" style="background-color: #dddddd">
+                    <form method="post">
+                        <span>
+                            <input
+                                type="hidden"
+                                name="request_type"
+                                value={{ RequestType.UPDATE_DAILY_CALENDARS_DATES }}
+                            >
+                            <input type="date" id="calendars_start_date" name="start_date">
+                            <input type="date" id="calendars_end_date" name="end_date">
+                            <button type="submit">Show</button>
+                        </span>
+                    </form>
+                </div>
+                <div class="body-widget-element">
+                    <table class="daily-calendars-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                {% for person in calendar.people_sorted_by_name %}
+                                    <th> {{ person.display_name_frontend }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for day, people_days in calendar.get_daily_calendars_to_display().items() %}
+                                <tr>
+                                    <td> {{ day }} </td>
+                                    {% for people_day in people_days.values() %}
+                                        <td> {{ people_day.end.display_name_frontend }} </td>
+                                    {% endfor %}
+                                </tr>
                             {% endfor %}
-                        </select>
-                    </div>
-                    <div class="form-row">
-                        <label for="add_person_city"> City </label>
-                        <input type="text" id="add_person_city" name="city"> 
-                    </div>
-
+                        </tbody>
+                    </table>
                 </div>
 
-                {# submit button #}
-                <div class="body-widget-footer">
-                    <button type="submit">Submit</button>
-                </div>
-            
-            </form>
-        </div>
-
-        {# add trip #}
-        <div class="body-widget-container">
-            <div class="body-widget-header">Add Trip</div>
-
-            <form method="post">
-                <input type="hidden" name="request_type" value={{ RequestType.ADD_TRIP }}>
-
-                <div class="body-widget-body">
-
-                    {# drop-down list for person #}
-                    <div class="form-row">
-                        <label for="add_trip_person"> Person </label>
-                        <select id="add_trip_person", name="person_id">
-                            {% for single_person_calendar in calendar.single_person_calendars %}
-                                <option value="{{ single_person_calendar.person.unique_id }}">
-                                    {{ single_person_calendar.person.display_name_frontend }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    {# drop-down list for country, free field for city #}
-                    <div class="form-row">
-                        <label for="add_trip_country"> Country </label>
-                        <select id="add_trip_country" name="country">
-                            {% for c in objects.Country %}
-                                <option value="{{ c.name }}">{{ c.value.replace("_", " ").title() }} </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="form-row">
-                        <label for="add_trip_city"> City </label>
-                        <input type="text" id="add_trip_city" name="city">
-                    </div>
-
-                    {# date picker for dates #}
-                    <div class="form-row">
-                        <label for="add_trip_start_date"> Start </label>
-                        <input type="date" id="add_trip_start_date" name="start_date">
-                    </div>
-                    <div class="form-row">
-                        <label for="add_trip_end_date"> End </label>
-                        <input type="date" id="add_trip_start_date" name="end_date">
-                    </div>
-
-                </div>
-
-                {# submit button #}
-                <div class="body-widget-footer">
-                    <button type="submit">Submit</button>
-                </div>
-            
-            </form>
+            </div>
         </div>
 
     </div>

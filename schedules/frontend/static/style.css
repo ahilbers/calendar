@@ -9,7 +9,9 @@ body {
     font-size: 16px;
 }
 .body-container {
+    display: flex;
     padding: 10px 10px;
+    gap: 10px;
 }
 
 /* non-body */
@@ -38,7 +40,6 @@ h1 {
 .body-widget-container {
     border: 1px solid #666666;
     border-radius: 6px;
-    width: 400px;
     margin: 0px 0px 10px 0px;
 }
 .body-widget-header {
@@ -75,24 +76,20 @@ button {
     padding: 0px 4px 0px 4px;
 }
 
-/* calendar members table */
+/* tables */
 table, th, td {
     text-align: left;
     margin-bottom: 0px;
     padding: 0px 0px;
     border-collapse: collapse;
-}
-th, td {
     border-bottom: 1px solid #cccccc;
     padding: 2px 6px;
-    width: 200px;
 }
 th {
     background-color: #dddddd;
-    color: black;
 }
 
-/* add person form */
+/* forms */
 .form-row {
     display: flex;
     margin: 6px 0px;
@@ -105,4 +102,19 @@ th {
 .form-row input, .form-row select {
     width: 200px;
     box-sizing: border-box;
+}
+
+/* calendar members table */
+.calendars-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.calendar-members-table th, .calendar-members-table td {
+    width: 180px;
+}
+
+/* daily calendars table */
+.daily-calendars-table {
+    width: 100%;
 }
