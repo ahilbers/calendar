@@ -125,7 +125,9 @@ class FullCalendar:
         self.calendars: MutableMapping[Person, SinglePersonCalendar] = dict()
         self._id_to_person: MutableMapping[int, Person] = dict()
         self._people_sorted_cache: Iterable[Person] | None = None
-        self.daily_calendars_to_display: OrderedDict[dt.date, MutableMapping[Person, Day]] | None = None
+        self._daily_calendars_start_date: dt.date | None = None
+        self._daily_calendars_end_date: dt.date | None = None
+        self._daily_calendars_to_display: OrderedDict[dt.date, MutableMapping[Person, Day]] | None = None
 
     def _add_person(self, person: Person) -> None:
         if person in self.calendars.keys():
@@ -133,7 +135,7 @@ class FullCalendar:
         self.calendars[person] = SinglePersonCalendar(person)
         self._id_to_person[hash(person)] = person
         self._people_sorted_cache = None  # Needs to be recalculated
-        self.daily_calendars_to_display = None  # Needs to be recalculated
+        self._daily_calendars_to_display = None  # Needs to be recalculated
         logging.info("Added %s to calendar", person)
 
     def _clear_all_people(self) -> None:
@@ -142,7 +144,7 @@ class FullCalendar:
 
     def _add_trip(self, person: Person, trip: Trip) -> None:
         self.calendars[person].add_trip(trip)
-        self.daily_calendars_to_display = None  # Needs to be recalculated
+        self._daily_calendars_to_display = None  # Needs to be recalculated
         logging.info(f"Added {trip} to calendar for {person}.")
 
     def process_frontend_request(self, request_raw: Mapping[str, Any]) -> Response:
@@ -176,12 +178,12 @@ class FullCalendar:
                 message = get_message_from_handled_error_else_raise(err)
                 return Response(code=400, message=f"Failed to add trip: {message}")
 
-        if request.request_type == RequestType.UPDATE_DISPLAY_DAILY_CALENDARS:
+        if request.request_type == RequestType.UPDATE_DAILY_CALENDARS_DATES:
             try:
                 start_date = dt.date.strptime(request.payload["start_date"], "%Y-%m-%d")
                 end_date = dt.date.strptime(request.payload["end_date"], "%Y-%m-%d")
-                self._update_daily_calendars(start_date, end_date)
-                return Response(code=200, message=f"Updated daily calendars, {start_date} to {end_date}.")
+                self._update_daily_calendars_dates(start_date, end_date)
+                return Response(code=200, message=f"Updated daily calendars dates, {start_date} to {end_date}.")
             except (CalendarBaseException, KeyError) as err:
                 message = get_message_from_handled_error_else_raise(err)
                 return Response(code=400, message=f"Failed to update daily calendar: {message}")
@@ -201,18 +203,33 @@ class FullCalendar:
         """Get list of single-person calendars, sorted by name."""
         return [self.calendars[person] for person in self.people_sorted_by_name]
 
-    def _update_daily_calendars(self, start_date: dt.date, end_date: dt.date):
+    def _update_daily_calendars_dates(self, start_date: dt.date, end_date: dt.date) -> None:
+        self._daily_calendars_start_date = start_date
+        self._daily_calendars_end_date = end_date
+        self._daily_calendars_to_display = None  # Needs to be recalculated
+        logging.info(f"Updated daily calendar dates: {start_date}, {end_date}.")
+
+    def _update_daily_calendars(self) -> None:
+        start_date = self._daily_calendars_start_date
+        end_date = self._daily_calendars_end_date
+        if start_date is None or end_date is None:
+            raise CalendarError(f"Both start_date and end_date must be set: {start_date}, {end_date}.")
         days = [start_date + dt.timedelta(days=i) for i in range((end_date - start_date).days + 1)]
         daily_calendars = {
             person: self.calendars[person].get_daily_calendar(start_date, end_date)
             for person in self.people_sorted_by_name
         }
-        self.daily_calendars_to_display = OrderedDict(
+        self._daily_calendars_to_display = OrderedDict(
             {day: {person: daily_calendars[person][day] for person in self.people_sorted_by_name} for day in days}
         )
+        logging.info("Updated daily calendars.")
 
     def get_daily_calendars_to_display(self) -> OrderedDict[dt.date, MutableMapping[Person, Day]]:
         """Get daily calendars for all calendar members in format that can be used by frontend."""
-        if self.daily_calendars_to_display is None:
+        if self._daily_calendars_start_date is None or self._daily_calendars_end_date is None:
             return OrderedDict(dict())
-        return self.daily_calendars_to_display
+        if self._daily_calendars_to_display is None:
+            self._update_daily_calendars()
+        if self._daily_calendars_to_display is None:
+            raise CalendarError("Failed to update daily calendars.")
+        return self._daily_calendars_to_display
