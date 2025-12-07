@@ -88,9 +88,6 @@ table, th, td {
 th {
     background-color: #dddddd;
 }
-.calendar-members-table th, .calendar-members-table td {
-    width: 180px;
-}
 
 /* forms */
 .form-row {
@@ -105,4 +102,14 @@ th {
 .form-row input, .form-row select {
     width: 200px;
     box-sizing: border-box;
+}
+
+/* calendars table */
+.calendars-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.calendar-members-table th, .calendar-members-table td {
+    width: 180px;
 }

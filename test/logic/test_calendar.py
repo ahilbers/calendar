@@ -258,6 +258,7 @@ class TestFullCalendar:
         _ = self.calendar.process_frontend_request(person_2_request)
 
         calendars = self.calendar.get_daily_calendars(dt.date(2025, 12, 1), dt.date(2025, 12, 5))
+        assert False
 
         # assert people[0].last_name == StrID("familyname")
         # assert people[1].last_name == StrID("lastname")

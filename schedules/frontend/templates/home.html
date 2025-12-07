@@ -149,9 +149,26 @@
 
             {# calendars #}
             <div class="body-widget-container">
-                <div class="body-widget-header"> Daily Calendars </div>
-                <div class="body-widget-element">    
-                    <table>
+                <div class="body-widget-header calendars-header">
+                    <span> Daily Calendars </span>
+                    
+                </div>
+                <div class="body-widget-body" style="background-color: #dddddd">
+                    <form method="post">
+                        <span>
+                            <input
+                                type="hidden"
+                                name="request_type"
+                                value={{ RequestType.UPDATE_DISPLAY_DAILY_CALENDARS }}
+                            >
+                            <input type="date" id="calendars_start_date" name="start_date">
+                            <input type="date" id="calendars_end_date" name="end_date">
+                            <button type="submit">Show</button>
+                        </span>
+                    </form>
+                </div>
+                <div class="body-widget-element">
+                    <table class="daily-calendars-table">
                         <thead>
                             <tr>
                                 <th>Date</th>
@@ -161,14 +178,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for day, people_days in calendar.get_daily_calendars().items() %}
+                            {% for day, people_days in calendar.get_daily_calendars_to_display().items() %}
                                 <tr>
                                     <td> {{ day }} </td>
                                     {% for people_day in people_days.values() %}
                                         <td> {{ people_day.end.display_name_frontend }} </td>
                                     {% endfor %}
-                                    {# <td> {{ single_person_calendar.person.display_name_frontend }} </td>
-                                    <td> {{ single_person_calendar.person.home.display_name_frontend }} </td> #}
                                 </tr>
                             {% endfor %}
                         </tbody>
