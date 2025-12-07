@@ -2,9 +2,9 @@
 
 import datetime as dt
 import logging
-from typing import Any, Iterable, Mapping, MutableMapping, OrderedDict, Set
+from typing import Any, OrderedDict
 
-from schedules.logic.requests import Request, RequestType, Response
+from schedules.logic.requests import Mapping, Request, RequestType, Response
 from schedules.logic.errors import (
     CalendarBaseException,
     CalendarError,
@@ -20,7 +20,7 @@ class SinglePersonCalendar:
     def __init__(self, person: Person) -> None:
         self.person: Person = person
         self._home: Location = person.home
-        self._trips: Set[Trip] = set()
+        self._trips: set[Trip] = set()
         self._trip_list_cache: list[Trip] | None = None  # Cache sorted list, cleared whenever new trip is added
         logging.info("Created calendar for %s", self.person)
 
@@ -122,12 +122,12 @@ class FullCalendar:
     """A full calendar, with multiple people."""
 
     def __init__(self) -> None:
-        self.calendars: MutableMapping[Person, SinglePersonCalendar] = dict()
-        self._id_to_person: MutableMapping[int, Person] = dict()
-        self._people_sorted_cache: Iterable[Person] | None = None
+        self.calendars: dict[Person, SinglePersonCalendar] = dict()
+        self._id_to_person: dict[int, Person] = dict()
+        self._people_sorted_cache: list[Person] | None = None
         self._daily_calendars_start_date: dt.date | None = None
         self._daily_calendars_end_date: dt.date | None = None
-        self._daily_calendars_to_display: OrderedDict[dt.date, MutableMapping[Person, Day]] | None = None
+        self._daily_calendars_to_display: OrderedDict[dt.date, dict[Person, Day]] | None = None
 
     def _add_person(self, person: Person) -> None:
         if person in self.calendars.keys():
@@ -193,7 +193,7 @@ class FullCalendar:
         return Response(code=400, message=f"Unknown request type: {request.request_type}.")
 
     @property
-    def people_sorted_by_name(self) -> Iterable[Person]:
+    def people_sorted_by_name(self) -> list[Person]:
         if not self._people_sorted_cache:
             self._people_sorted_cache = sorted(
                 self.calendars.keys(), key=lambda person: (person.last_name, person.first_name)
@@ -226,7 +226,7 @@ class FullCalendar:
         )
         logging.info("Updated daily calendars.")
 
-    def get_daily_calendars_to_display(self) -> OrderedDict[dt.date, MutableMapping[Person, Day]]:
+    def get_daily_calendars_to_display(self) -> OrderedDict[dt.date, dict[Person, Day]]:
         """Get daily calendars for all calendar members in format that can be used by frontend."""
         if self._daily_calendars_start_date is None or self._daily_calendars_end_date is None:
             return OrderedDict(dict())

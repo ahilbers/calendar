@@ -1,7 +1,5 @@
 """Define the pages of the website."""
 
-import datetime as dt
-
 from typing import cast
 from flask import Blueprint, current_app, render_template, request as flask_request
 

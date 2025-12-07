@@ -226,7 +226,7 @@ class TestFullCalendar:
         assert len(self.calendar.calendars) == 0
 
     def test_add_trip(self):
-        _ = self.calendar.process_frontend_request(self.add_person_request)
+        self.calendar.process_frontend_request(self.add_person_request)
         person = list(self.calendar.calendars.keys())[0]
         add_trip_request = {
             "request_type": "ADD_TRIP",
@@ -245,21 +245,59 @@ class TestFullCalendar:
         assert trip.start_date == dt.date(2025, 11, 25)
         assert trip.end_date == dt.date(2025, 11, 28)
 
-    def test_get_all_calendars(self):
+    def test_get_daily_calendars_home(self):
         person_1_request = self.add_person_request.copy()
         person_2_request: dict[str, Any] = {
             REQUEST_TYPE_ID: RequestType.ADD_PERSON,
             "last_name": "familyname",
             "first_name": "givenname",
             "country": objects.Country.UNITED_KINGDOM.name,
-            "city": "London",
+            "city": "london",
         }
-        _ = self.calendar.process_frontend_request(person_1_request)
-        _ = self.calendar.process_frontend_request(person_2_request)
+        update_daily_calendars_dates_request: dict[str, Any] = {
+            REQUEST_TYPE_ID: RequestType.UPDATE_DAILY_CALENDARS_DATES,
+            "start_date": "2025-12-01",
+            "end_date": "2025-12-03",
+        }
+        self.calendar.process_frontend_request(person_1_request)
+        self.calendar.process_frontend_request(person_2_request)
+        self.calendar.process_frontend_request(update_daily_calendars_dates_request)
 
-        calendars = self.calendar.get_daily_calendars(dt.date(2025, 12, 1), dt.date(2025, 12, 5))
-        assert False
+        daily_calendars = self.calendar.get_daily_calendars_to_display()
 
-        # assert people[0].last_name == StrID("familyname")
-        # assert people[1].last_name == StrID("lastname")
-        # breakpoint()
+        assert len(self.calendar.people_sorted_by_name) == 2
+        familyname, lastname = self.calendar.people_sorted_by_name
+        for date in [dt.date(2025, 12, 1), dt.date(2025, 12, 2), dt.date(2025, 12, 3)]:
+            assert daily_calendars[date][familyname].start == Location(Country.UNITED_KINGDOM, city=StrID("london"))
+            assert daily_calendars[date][familyname].end == Location(Country.UNITED_KINGDOM, city=StrID("london"))
+            assert daily_calendars[date][lastname].start == Location(Country.NETHERLANDS, city=StrID("amsterdam"))
+            assert daily_calendars[date][lastname].end == Location(Country.NETHERLANDS, city=StrID("amsterdam"))
+
+    def test_get_daily_calendars_trip(self):
+        person_1_request = self.add_person_request.copy()
+        update_daily_calendars_dates_request: dict[str, Any] = {
+            REQUEST_TYPE_ID: RequestType.UPDATE_DAILY_CALENDARS_DATES,
+            "start_date": "2025-12-01",
+            "end_date": "2025-12-03",
+        }
+        self.calendar.process_frontend_request(person_1_request)
+        person = list(self.calendar.calendars.keys())[0]
+        self.calendar.process_frontend_request(update_daily_calendars_dates_request)
+        add_trip_request = {
+            "request_type": "ADD_TRIP",
+            "person_id": str(hash(person)),
+            "country": "ICELAND",
+            "city": "reykjavik",
+            "start_date": "2025-12-02",
+            "end_date": "2025-12-03",
+        }
+        self.calendar.process_frontend_request(add_trip_request)
+
+        daily_calendars = self.calendar.get_daily_calendars_to_display()
+
+        assert daily_calendars[dt.date(2025, 12, 1)][person].start == Location(Country.NETHERLANDS, StrID("amsterdam"))
+        assert daily_calendars[dt.date(2025, 12, 1)][person].end == Location(Country.NETHERLANDS, StrID("amsterdam"))
+        assert daily_calendars[dt.date(2025, 12, 2)][person].start == Location(Country.NETHERLANDS, StrID("amsterdam"))
+        assert daily_calendars[dt.date(2025, 12, 2)][person].end == Location(Country.ICELAND, StrID("reykjavik"))
+        assert daily_calendars[dt.date(2025, 12, 3)][person].start == Location(Country.ICELAND, StrID("reykjavik"))
+        assert daily_calendars[dt.date(2025, 12, 3)][person].end == Location(Country.NETHERLANDS, StrID("amsterdam"))
