@@ -1,12 +1,16 @@
 """The calendar, which holds one person's schedule."""
 
 import datetime as dt
-import functools
 import logging
 from typing import Any, Iterable, Mapping, MutableMapping, OrderedDict, Set
 
 from schedules.logic.requests import Request, RequestType, Response
-from schedules.logic.errors import CalendarBaseException, CalendarError, RequestError
+from schedules.logic.errors import (
+    CalendarBaseException,
+    CalendarError,
+    RequestError,
+    get_message_from_handled_error_else_raise,
+)
 from schedules.logic.objects import Day, Location, Person, Trip
 
 
@@ -154,8 +158,9 @@ class FullCalendar:
                 person = Person.from_request(request)
                 self._add_person(person)
                 return Response(code=200, message=f"Added person {person}.")
-            except CalendarBaseException as err:
-                return Response(code=400, message=f"Failed to add person: {err.message}")
+            except Exception as err:
+                message = get_message_from_handled_error_else_raise(err)
+                return Response(code=400, message=f"Failed to add person: {message}")
 
         if request.request_type == RequestType.CLEAR_ALL_PEOPLE:
             self._clear_all_people()
@@ -167,8 +172,9 @@ class FullCalendar:
                 trip = Trip.from_request(request)
                 self._add_trip(person=person, trip=trip)
                 return Response(code=200, message=f"Added {trip} to calendar for {person}.")
-            except CalendarBaseException as err:
-                return Response(code=400, message=f"Failed to add trip: {err.message}")
+            except (CalendarBaseException, KeyError) as err:
+                message = get_message_from_handled_error_else_raise(err)
+                return Response(code=400, message=f"Failed to add trip: {message}")
 
         return Response(code=400, message=f"Unknown request type: {request.request_type}.")
 
@@ -185,10 +191,10 @@ class FullCalendar:
         """Get list of single-person calendars, sorted by name."""
         return [self.calendars[person] for person in self.people_sorted_by_name]
 
-    def get_daily_calendars(self) -> OrderedDict[dt.date, MutableMapping[Person, Day]]:
+    def get_daily_calendars(
+        self, start_date: dt.date, end_date: dt.date
+    ) -> OrderedDict[dt.date, MutableMapping[Person, Day]]:
         """Get daily calendars for all calendar members in format that can be used by frontend."""
-        start_date = dt.date(2025, 12, 1)
-        end_date = dt.date(2025, 12, 5)
         days = [start_date + dt.timedelta(days=i) for i in range((end_date - start_date).days + 1)]
         daily_calendars = {
             person: self.calendars[person].get_daily_calendar(start_date, end_date)
