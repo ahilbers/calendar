@@ -1,5 +1,7 @@
 """Define the pages of the website."""
 
+import datetime as dt
+
 from typing import cast
 from flask import Blueprint, current_app, render_template, request as flask_request
 
@@ -29,6 +31,8 @@ def home() -> str:
     for person in [person_1, person_2]:
         if person not in app.calendar.calendars.keys():
             app.calendar._add_person(person)
+    app.calendar._daily_calendars_start_date = dt.date(2025, 12, 10)
+    app.calendar._daily_calendars_end_date = dt.date(2025, 12, 31)
 
     if flask_request.method == "POST":
         response = app.calendar.process_frontend_request(flask_request.form.to_dict())

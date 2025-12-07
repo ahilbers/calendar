@@ -140,6 +140,8 @@ class FullCalendar:
 
     def _clear_all_people(self) -> None:
         self.calendars = dict()
+        self._people_sorted_cache = None
+        self._daily_calendars_to_display = None
         logging.info("Cleared all people from calendar.")
 
     def _add_trip(self, person: Person, trip: Trip) -> None:
