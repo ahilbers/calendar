@@ -69,7 +69,7 @@
                             <label for="add_person_country"> Country </label>
                             <select id="country", id="add_person_country" name="country">
                                 {% for c in objects.Country %}
-                                    <option value="{{ c.name }}">{{ c.value.replace("_", " ").title() }} </option>
+                                    <option value="{{ c.name }}">{{ c.name.replace("_", " ").title() }} </option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -114,7 +114,7 @@
                             <label for="add_trip_country"> Country </label>
                             <select id="add_trip_country" name="country">
                                 {% for c in objects.Country %}
-                                    <option value="{{ c.name }}">{{ c.value.replace("_", " ").title() }} </option>
+                                    <option value="{{ c.name }}">{{ c.name.replace("_", " ").title() }} </option>
                                 {% endfor %}
                             </select>
                         </div>

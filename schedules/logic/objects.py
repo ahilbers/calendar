@@ -10,10 +10,11 @@ from schedules.logic.errors import RequestError
 
 
 class Country(StrEnum):
-    NETHERLANDS = "NETHERLANDS"
-    NORWAY = "NORWAY"
-    SWITZERLAND = "SWITZERLAND"
-    UNITED_KINGDOM = "UNITED_KINGDOM"
+    ICELAND = "ISL"
+    NETHERLANDS = "NLD"
+    NORWAY = "NOR"
+    SWITZERLAND = "CHE"
+    UNITED_KINGDOM = "GBR"
 
 
 class StrID(str):
