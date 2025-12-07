@@ -104,7 +104,7 @@ th {
     box-sizing: border-box;
 }
 
-/* calendars table */
+/* calendar members table */
 .calendars-header {
     display: flex;
     justify-content: space-between;
@@ -112,4 +112,9 @@ th {
 }
 .calendar-members-table th, .calendar-members-table td {
     width: 180px;
+}
+
+/* daily calendars table */
+.daily-calendars-table {
+    width: 100%;
 }
