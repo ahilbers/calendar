@@ -6,7 +6,7 @@ from enum import StrEnum
 from typing import Self
 
 from schedules.logic.requests import Request
-from schedules.logic.errors import RequestError
+from schedules.logic.errors import CalendarError, RequestError
 
 
 class Country(StrEnum):
@@ -32,12 +32,12 @@ class Location:
     country: Country
     city: StrID
 
-    def __repr__(self) -> str:
-        return f"{self.country.value}:{self.city.upper()}"
-
     def __post_init__(self) -> None:
         if not len(self.city) > 0:
             raise RequestError(f"City name must be set: `{self.city}`.")
+
+    def __repr__(self) -> str:
+        return f"{self.country.value}:{self.city.upper()}"
 
     @classmethod
     def from_request(cls, request: Request) -> Self:
@@ -60,6 +60,9 @@ class Person:
     def __post_init__(self) -> None:
         if not (len(self.last_name) > 0 and len(self.first_name) > 0):
             raise RequestError(f"Both first name and last name must be set: `{self.last_name}`, `{self.first_name}`.")
+
+    def __repr__(self):
+        return f"Person({self.last_name}, {self.first_name})"
 
     @classmethod
     def from_request(cls, request: Request) -> Self:
@@ -86,7 +89,7 @@ class Trip:
 
     def __post_init__(self) -> None:
         if not self.start_date < self.end_date:
-            raise ValueError(f"Trip start date must be before end date: `{self.start_date}`, `{self.end_date}`.")
+            raise CalendarError(f"Trip start date must be before end date: `{self.start_date}`, `{self.end_date}`.")
 
     @classmethod
     def from_request(cls, request: Request) -> Self:
@@ -98,6 +101,6 @@ class Trip:
 
 
 @dataclasses.dataclass(frozen=True)
-class Day:
+class DayLocation:
     start: Location
     end: Location

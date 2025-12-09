@@ -11,7 +11,7 @@ from schedules.logic.errors import (
     RequestError,
     get_message_from_handled_error_else_raise,
 )
-from schedules.logic.objects import Day, Location, Person, Trip
+from schedules.logic.objects import DayLocation, Location, Person, Trip
 
 
 class SinglePersonCalendar:
@@ -52,74 +52,74 @@ class SinglePersonCalendar:
         logging.info("Adding trip %s to calendar %s", trip, self)
         self._trips.add(trip)
 
-    def _get_travel_start_of_trip(self, trip_idx: int) -> Day:
+    def _get_travel_start_of_trip(self, trip_idx: int) -> DayLocation:
         trip = self.trip_list[trip_idx]
 
         # If first trip, start at home
         if trip == self.trip_list[0]:
-            return Day(start=self._home, end=trip.location)
+            return DayLocation(start=self._home, end=trip.location)
 
         # If trip starts on or before last day of previous trip, travel straight
         previous_trip = self.trip_list[trip_idx - 1]
         if trip.start_date <= previous_trip.end_date:
-            return Day(start=previous_trip.location, end=trip.location)
+            return DayLocation(start=previous_trip.location, end=trip.location)
 
         # Else travel from home
-        return Day(start=self._home, end=trip.location)
+        return DayLocation(start=self._home, end=trip.location)
 
-    def _get_travel_end_of_trip(self, trip_idx: int) -> Day:
+    def _get_travel_end_of_trip(self, trip_idx: int) -> DayLocation:
         trip = self.trip_list[trip_idx]
 
         # If trip ends before last day of previous trip, travel back there
         if trip != self.trip_list[0] and trip.end_date < (previous_trip := self.trip_list[trip_idx - 1]).end_date:
-            return Day(start=trip.location, end=previous_trip.location)
+            return DayLocation(start=trip.location, end=previous_trip.location)
 
         # If last trip, end at home
         if trip == self.trip_list[-1]:
-            return Day(start=trip.location, end=self._home)
+            return DayLocation(start=trip.location, end=self._home)
 
         # If trip ends on first day of next trip, travel straight
         next_trip = self.trip_list[trip_idx + 1]
         if trip.end_date == next_trip.start_date:
-            return Day(start=trip.location, end=next_trip.location)
+            return DayLocation(start=trip.location, end=next_trip.location)
 
         # Else travel to home
-        return Day(start=trip.location, end=self._home)
+        return DayLocation(start=trip.location, end=self._home)
 
-    def _get_travel_days(self) -> dict[dt.date, Day]:
+    def _get_travel_days(self) -> dict[dt.date, DayLocation]:
         """Determine the days at which travel occurs."""
         if not self._trips:
             return dict()
 
-        travel_days: dict[dt.date, Day] = {}
+        travel_days: dict[dt.date, DayLocation] = {}
         for trip_idx, trip in enumerate(self.trip_list):
             travel_days[trip.start_date] = self._get_travel_start_of_trip(trip_idx)
             travel_days[trip.end_date] = self._get_travel_end_of_trip(trip_idx)
 
         return travel_days
 
-    def get_daily_calendar(self, start_date: dt.date, end_date: dt.date) -> dict[dt.date, Day]:
+    def get_daily_calendar(self, start_date: dt.date, end_date: dt.date) -> dict[dt.date, DayLocation]:
         """Construct a calendar of where the person is on every day."""
         num_days = (end_date - start_date).days + 1  # Include endpoints
-        daily_calendar: dict[dt.date, Day] = {}
+        daily_calendar: dict[dt.date, DayLocation] = {}
 
         # Determine where person starts and ends each day
         travel_days = self._get_travel_days()
         for day in (start_date + dt.timedelta(days=i) for i in range(num_days)):
             if not travel_days or day < min(travel_days) or day > max(travel_days):
-                daily_calendar[day] = Day(start=self._home, end=self._home)
+                daily_calendar[day] = DayLocation(start=self._home, end=self._home)
             elif day in travel_days:
                 daily_calendar[day] = travel_days[day]
             else:
                 last_travel_day = max(date for date in travel_days.keys() if date < day)
                 last_travel_end = travel_days[last_travel_day].end
-                daily_calendar[day] = Day(start=last_travel_end, end=last_travel_end)
+                daily_calendar[day] = DayLocation(start=last_travel_end, end=last_travel_end)
 
         return daily_calendar
 
 
 class FullCalendar:
-    """A full calendar, with multiple people."""
+    """A full calendar, with multiple people and support for interacting with frontend."""
 
     def __init__(self) -> None:
         self.calendars: dict[Person, SinglePersonCalendar] = dict()
@@ -127,7 +127,7 @@ class FullCalendar:
         self._people_sorted_cache: list[Person] | None = None
         self._daily_calendars_start_date: dt.date | None = None
         self._daily_calendars_end_date: dt.date | None = None
-        self._daily_calendars_to_display: OrderedDict[dt.date, dict[Person, Day]] | None = None
+        self._daily_calendars_to_display: OrderedDict[dt.date, OrderedDict[Person, DayLocation]] | None = None
 
     def _add_person(self, person: Person) -> None:
         if person in self.calendars.keys():
@@ -221,17 +221,27 @@ class FullCalendar:
             person: self.calendars[person].get_daily_calendar(start_date, end_date)
             for person in self.people_sorted_by_name
         }
-        self._daily_calendars_to_display = OrderedDict(
-            {day: {person: daily_calendars[person][day] for person in self.people_sorted_by_name} for day in days}
-        )
+        self._daily_calendars_to_display = OrderedDict({
+            day: OrderedDict({person: daily_calendars[person][day] for person in self.people_sorted_by_name})
+            for day in days
+        })  # fmt: skip
         logging.info("Updated daily calendars.")
 
-    def get_daily_calendars_to_display(self) -> OrderedDict[dt.date, dict[Person, Day]]:
+    def get_daily_calendars_to_display(self) -> OrderedDict[dt.date, OrderedDict[Person, DayLocation]]:
         """Get daily calendars for all calendar members in format that can be used by frontend."""
         if self._daily_calendars_start_date is None or self._daily_calendars_end_date is None:
-            return OrderedDict(dict())
+            return OrderedDict(OrderedDict())
         if self._daily_calendars_to_display is None:
             self._update_daily_calendars()
         if self._daily_calendars_to_display is None:
             raise CalendarError("Failed to update daily calendars.")
         return self._daily_calendars_to_display
+
+    def is_everyone_together(self, date: dt.date) -> bool:
+        daily_calendars = self.get_daily_calendars_to_display()
+        try:
+            return len(set(day.end for day in daily_calendars[date].values())) == 1
+        except KeyError:
+            raise CalendarError(
+                f"Date {date} outside daily calendar range {min(daily_calendars.keys())}-{max(daily_calendars.keys())}."
+            )
