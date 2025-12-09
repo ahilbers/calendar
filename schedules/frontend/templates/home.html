@@ -179,10 +179,10 @@
                         </thead>
                         <tbody>
                             {% for day, people_days in calendar.get_daily_calendars_to_display().items() %}
-                                <tr>
+                                <tr style="background-color: transparent">
                                     <td> {{ day }} </td>
-                                    {% for people_day in people_days.values() %}
-                                        <td> {{ people_day.end.display_name_frontend }} </td>
+                                    {% for people_day_location in people_days.values() %}
+                                        <td> {{ people_day_location.end.display_name_frontend }} </td>
                                     {% endfor %}
                                 </tr>
                             {% endfor %}

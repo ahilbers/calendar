@@ -6,7 +6,7 @@ import pytest
 from schedules.logic import objects
 from schedules.logic.calendar import FullCalendar, SinglePersonCalendar
 from schedules.logic.errors import CalendarError
-from schedules.logic.objects import Country, Day, Location, Person, StrID, Trip
+from schedules.logic.objects import Country, DayLocation, Location, Person, StrID, Trip
 from schedules.logic.requests import REQUEST_TYPE_ID, RequestType
 
 
@@ -96,9 +96,9 @@ class TestDailyCalendar:
         daily_calendar_actual = self.calendar.get_daily_calendar(dt.date(2024, 6, 22), dt.date(2024, 6, 24))
 
         daily_calendar_expected = {
-            dt.date(2024, 6, 22): Day(start=self.calendar.person.home, end=self.calendar.person.home),
-            dt.date(2024, 6, 23): Day(start=self.calendar.person.home, end=self.calendar.person.home),
-            dt.date(2024, 6, 24): Day(start=self.calendar.person.home, end=self.calendar.person.home),
+            dt.date(2024, 6, 22): DayLocation(start=self.calendar.person.home, end=self.calendar.person.home),
+            dt.date(2024, 6, 23): DayLocation(start=self.calendar.person.home, end=self.calendar.person.home),
+            dt.date(2024, 6, 24): DayLocation(start=self.calendar.person.home, end=self.calendar.person.home),
         }
         assert daily_calendar_actual == daily_calendar_expected
 
@@ -111,11 +111,11 @@ class TestDailyCalendar:
         daily_calendar_actual = self.calendar.get_daily_calendar(dt.date(2024, 6, 22), dt.date(2024, 6, 26))
 
         daily_calendar_expected = {
-            dt.date(2024, 6, 22): Day(start=self.calendar.person.home, end=self.calendar.person.home),
-            dt.date(2024, 6, 23): Day(start=self.calendar.person.home, end=trip.location),
-            dt.date(2024, 6, 24): Day(start=trip.location, end=trip.location),
-            dt.date(2024, 6, 25): Day(start=trip.location, end=self.calendar.person.home),
-            dt.date(2024, 6, 26): Day(start=self.calendar.person.home, end=self.calendar.person.home),
+            dt.date(2024, 6, 22): DayLocation(start=self.calendar.person.home, end=self.calendar.person.home),
+            dt.date(2024, 6, 23): DayLocation(start=self.calendar.person.home, end=trip.location),
+            dt.date(2024, 6, 24): DayLocation(start=trip.location, end=trip.location),
+            dt.date(2024, 6, 25): DayLocation(start=trip.location, end=self.calendar.person.home),
+            dt.date(2024, 6, 26): DayLocation(start=self.calendar.person.home, end=self.calendar.person.home),
         }
         assert daily_calendar_actual == daily_calendar_expected
 
@@ -128,15 +128,15 @@ class TestDailyCalendar:
         daily_calendar_actual = self.calendar.get_daily_calendar(dt.date(2024, 6, 22), dt.date(2024, 6, 30))
 
         daily_calendar_expected = {
-            dt.date(2024, 6, 22): Day(start=self.calendar.person.home, end=self.calendar.person.home),
-            dt.date(2024, 6, 23): Day(start=self.calendar.person.home, end=trip_1.location),
-            dt.date(2024, 6, 24): Day(start=trip_1.location, end=trip_1.location),
-            dt.date(2024, 6, 25): Day(start=trip_1.location, end=self.calendar.person.home),
-            dt.date(2024, 6, 26): Day(start=self.calendar.person.home, end=self.calendar.person.home),
-            dt.date(2024, 6, 27): Day(start=self.calendar.person.home, end=trip_2.location),
-            dt.date(2024, 6, 28): Day(start=trip_2.location, end=trip_2.location),
-            dt.date(2024, 6, 29): Day(start=trip_2.location, end=self.calendar.person.home),
-            dt.date(2024, 6, 30): Day(start=self.calendar.person.home, end=self.calendar.person.home),
+            dt.date(2024, 6, 22): DayLocation(start=self.calendar.person.home, end=self.calendar.person.home),
+            dt.date(2024, 6, 23): DayLocation(start=self.calendar.person.home, end=trip_1.location),
+            dt.date(2024, 6, 24): DayLocation(start=trip_1.location, end=trip_1.location),
+            dt.date(2024, 6, 25): DayLocation(start=trip_1.location, end=self.calendar.person.home),
+            dt.date(2024, 6, 26): DayLocation(start=self.calendar.person.home, end=self.calendar.person.home),
+            dt.date(2024, 6, 27): DayLocation(start=self.calendar.person.home, end=trip_2.location),
+            dt.date(2024, 6, 28): DayLocation(start=trip_2.location, end=trip_2.location),
+            dt.date(2024, 6, 29): DayLocation(start=trip_2.location, end=self.calendar.person.home),
+            dt.date(2024, 6, 30): DayLocation(start=self.calendar.person.home, end=self.calendar.person.home),
         }
         assert daily_calendar_actual == daily_calendar_expected
 
@@ -149,13 +149,13 @@ class TestDailyCalendar:
         daily_calendar_actual = self.calendar.get_daily_calendar(dt.date(2024, 6, 22), dt.date(2024, 6, 28))
 
         daily_calendar_expected = {
-            dt.date(2024, 6, 22): Day(start=self.calendar.person.home, end=self.calendar.person.home),
-            dt.date(2024, 6, 23): Day(start=self.calendar.person.home, end=trip_1.location),
-            dt.date(2024, 6, 24): Day(start=trip_1.location, end=trip_1.location),
-            dt.date(2024, 6, 25): Day(start=trip_1.location, end=trip_2.location),
-            dt.date(2024, 6, 26): Day(start=trip_2.location, end=trip_2.location),
-            dt.date(2024, 6, 27): Day(start=trip_2.location, end=self.calendar.person.home),
-            dt.date(2024, 6, 28): Day(start=self.calendar.person.home, end=self.calendar.person.home),
+            dt.date(2024, 6, 22): DayLocation(start=self.calendar.person.home, end=self.calendar.person.home),
+            dt.date(2024, 6, 23): DayLocation(start=self.calendar.person.home, end=trip_1.location),
+            dt.date(2024, 6, 24): DayLocation(start=trip_1.location, end=trip_1.location),
+            dt.date(2024, 6, 25): DayLocation(start=trip_1.location, end=trip_2.location),
+            dt.date(2024, 6, 26): DayLocation(start=trip_2.location, end=trip_2.location),
+            dt.date(2024, 6, 27): DayLocation(start=trip_2.location, end=self.calendar.person.home),
+            dt.date(2024, 6, 28): DayLocation(start=self.calendar.person.home, end=self.calendar.person.home),
         }
         assert daily_calendar_actual == daily_calendar_expected
 
@@ -168,13 +168,13 @@ class TestDailyCalendar:
         daily_calendar_actual = self.calendar.get_daily_calendar(dt.date(2024, 6, 22), dt.date(2024, 6, 28))
 
         daily_calendar_expected = {
-            dt.date(2024, 6, 22): Day(start=self.calendar.person.home, end=trip_1.location),
-            dt.date(2024, 6, 23): Day(start=trip_1.location, end=trip_1.location),
-            dt.date(2024, 6, 24): Day(start=trip_1.location, end=trip_2.location),
-            dt.date(2024, 6, 25): Day(start=trip_2.location, end=trip_2.location),
-            dt.date(2024, 6, 26): Day(start=trip_2.location, end=trip_1.location),
-            dt.date(2024, 6, 27): Day(start=trip_1.location, end=trip_1.location),
-            dt.date(2024, 6, 28): Day(start=trip_1.location, end=self.calendar.person.home),
+            dt.date(2024, 6, 22): DayLocation(start=self.calendar.person.home, end=trip_1.location),
+            dt.date(2024, 6, 23): DayLocation(start=trip_1.location, end=trip_1.location),
+            dt.date(2024, 6, 24): DayLocation(start=trip_1.location, end=trip_2.location),
+            dt.date(2024, 6, 25): DayLocation(start=trip_2.location, end=trip_2.location),
+            dt.date(2024, 6, 26): DayLocation(start=trip_2.location, end=trip_1.location),
+            dt.date(2024, 6, 27): DayLocation(start=trip_1.location, end=trip_1.location),
+            dt.date(2024, 6, 28): DayLocation(start=trip_1.location, end=self.calendar.person.home),
         }
         assert daily_calendar_actual == daily_calendar_expected
 
@@ -273,15 +273,15 @@ class TestFullCalendar:
             assert daily_calendars[date][lastname].start == Location(Country.NETHERLANDS, city=StrID("amsterdam"))
             assert daily_calendars[date][lastname].end == Location(Country.NETHERLANDS, city=StrID("amsterdam"))
 
-    def test_get_daily_calendars_trip(self):
+    def test_get_daily_calendars_with_trip(self):
         person_1_request = self.add_person_request.copy()
+        self.calendar.process_frontend_request(person_1_request)
+        person = list(self.calendar.calendars.keys())[0]
         update_daily_calendars_dates_request: dict[str, Any] = {
             REQUEST_TYPE_ID: RequestType.UPDATE_DAILY_CALENDARS_DATES,
             "start_date": "2025-12-01",
             "end_date": "2025-12-03",
         }
-        self.calendar.process_frontend_request(person_1_request)
-        person = list(self.calendar.calendars.keys())[0]
         self.calendar.process_frontend_request(update_daily_calendars_dates_request)
         add_trip_request = {
             "request_type": "ADD_TRIP",
@@ -301,3 +301,51 @@ class TestFullCalendar:
         assert daily_calendars[dt.date(2025, 12, 2)][person].end == Location(Country.ICELAND, StrID("reykjavik"))
         assert daily_calendars[dt.date(2025, 12, 3)][person].start == Location(Country.ICELAND, StrID("reykjavik"))
         assert daily_calendars[dt.date(2025, 12, 3)][person].end == Location(Country.NETHERLANDS, StrID("amsterdam"))
+
+    def test_all_together_one_person(self):
+        self.calendar.process_frontend_request(self.add_person_request)
+        self.calendar.process_frontend_request({
+            REQUEST_TYPE_ID: RequestType.UPDATE_DAILY_CALENDARS_DATES,
+            "start_date": "2025-12-01",
+            "end_date": "2025-12-03",
+        })  # fmt: skip
+        with pytest.raises(CalendarError):
+            self.calendar.is_everyone_together(dt.date(2025, 11, 30))  # Outside range of daily calendar
+        assert self.calendar.is_everyone_together(dt.date(2025, 12, 1))
+        assert self.calendar.is_everyone_together(dt.date(2025, 12, 2))
+        assert self.calendar.is_everyone_together(dt.date(2025, 12, 3))
+        with pytest.raises(CalendarError):
+            self.calendar.is_everyone_together(dt.date(2025, 12, 4))  # Outside range of daily calendar
+
+    def test_all_together_two_people_with_trip(self):
+        person_1_request = self.add_person_request.copy()
+        person_2_request: dict[str, Any] = {
+            REQUEST_TYPE_ID: RequestType.ADD_PERSON,
+            "last_name": "familyname",
+            "first_name": "givenname",
+            "country": objects.Country.UNITED_KINGDOM.name,
+            "city": "london",
+        }
+        self.calendar.process_frontend_request(person_1_request)
+        self.calendar.process_frontend_request(person_2_request)
+        person = list(self.calendar.calendars.keys())[0]
+
+        add_trip_request = {
+            "request_type": "ADD_TRIP",
+            "person_id": str(hash(person)),
+            "country": "UNITED_KINGDOM",
+            "city": "london",
+            "start_date": "2025-12-02",
+            "end_date": "2025-12-03",
+        }
+        update_daily_calendars_dates_request: dict[str, Any] = {
+            REQUEST_TYPE_ID: RequestType.UPDATE_DAILY_CALENDARS_DATES,
+            "start_date": "2025-12-01",
+            "end_date": "2025-12-03",
+        }
+        self.calendar.process_frontend_request(add_trip_request)
+        self.calendar.process_frontend_request(update_daily_calendars_dates_request)
+
+        assert not self.calendar.is_everyone_together(dt.date(2025, 12, 1))
+        assert self.calendar.is_everyone_together(dt.date(2025, 12, 2))
+        assert not self.calendar.is_everyone_together(dt.date(2025, 12, 3))
