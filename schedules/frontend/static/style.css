@@ -118,3 +118,17 @@ th {
 .daily-calendars-table {
     width: 100%;
 }
+.daily-calendars-table-date-not-together {
+    padding: 1px 4px;
+    background-color: #dddddd;
+    color: black;
+    font-size: 14px;
+    border-radius: 6px;
+}
+.daily-calendars-table-date-together {
+    padding: 1px 4px;
+    background-color: forestgreen;
+    color: white;
+    font-size: 14px;
+    border-radius: 6px;
+}

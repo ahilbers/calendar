@@ -179,8 +179,17 @@
                         </thead>
                         <tbody>
                             {% for day, people_days in calendar.get_daily_calendars_to_display().items() %}
-                                <tr style="background-color: transparent">
-                                    <td> {{ day }} </td>
+                                <tr style="background-color: ;">
+                                    <td> 
+                                        <div class="
+                                            {% if calendar.is_everyone_together(day) %}
+                                                daily-calendars-table-date-together
+                                            {% else %}
+                                                daily-calendars-table-date-not-together
+                                            {% endif %}">
+                                                {{ day }} 
+                                        </div>
+                                    </td>
                                     {% for people_day_location in people_days.values() %}
                                         <td> {{ people_day_location.end.display_name_frontend }} </td>
                                     {% endfor %}
