@@ -52,6 +52,12 @@ class Location:
 
 
 @dataclasses.dataclass(frozen=True)
+class DayLocation:
+    start: Location
+    end: Location
+
+
+@dataclasses.dataclass(frozen=True)
 class Person:
     last_name: StrID
     first_name: StrID
@@ -98,9 +104,3 @@ class Trip:
             start_date=dt.date.strptime(request.payload["start_date"], "%Y-%m-%d"),
             end_date=dt.date.strptime(request.payload["end_date"], "%Y-%m-%d"),
         )
-
-
-@dataclasses.dataclass(frozen=True)
-class DayLocation:
-    start: Location
-    end: Location

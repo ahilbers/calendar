@@ -22,8 +22,7 @@ def sample_person() -> Person:
     )
 
 
-class TestAddTrips:
-    """Tests for SinglePersonCalendar.add_trip."""
+class TestSinglePersonCalendar:
 
     @pytest.fixture(autouse=True)
     def set_up(self):
@@ -40,10 +39,8 @@ class TestAddTrips:
     def test_trips_returned_ordered(self):
         trip_later = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 25), dt.date(2024, 6, 26))
         trip_earlier = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 24))
-
         self.calendar.add_trip(trip_later)
         self.calendar.add_trip(trip_earlier)
-
         assert self.calendar.trip_list == [trip_earlier, trip_later]
 
     def test_raises_if_same_start_date(self, caplog: pytest.LogCaptureFixture):
@@ -84,7 +81,6 @@ class TestAddTrips:
 
 
 class TestDailyCalendar:
-    """Tests for SinglePersonCalendar.get_daily_calendar."""
 
     @pytest.fixture(autouse=True)
     def set_up(self):
