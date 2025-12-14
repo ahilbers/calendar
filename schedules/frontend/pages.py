@@ -4,7 +4,7 @@ from typing import cast
 from flask import Blueprint, current_app, render_template, request as flask_request
 
 from schedules.logic import objects
-from schedules.frontend.objects import AppWithCalendar
+from schedules.frontend.app_with_calendar import AppWithCalendar
 from schedules.logic.requests import RequestType, Response
 
 pages = Blueprint("pages", __name__)
