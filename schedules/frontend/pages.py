@@ -4,7 +4,7 @@ from typing import cast
 from flask import Blueprint, current_app, render_template, request as flask_request
 
 from schedules.logic import objects
-from schedules.frontend.objects import AppWithCalendar
+from schedules.frontend.app_with_calendar import AppWithCalendar
 from schedules.logic.requests import RequestType, Response
 
 pages = Blueprint("pages", __name__)
@@ -16,7 +16,12 @@ def home() -> str:
     response = Response(code=200, message="Ready")
 
     if flask_request.method == "POST":
-        response = app.calendar.process_frontend_request(flask_request.form.to_dict())
+        database_session = app.database_session()
+        response = app.calendar.process_frontend_request(
+            flask_request.form.to_dict(), database_session=database_session
+        )
+        database_session.close()
+
     return render_template(
         "home.html", calendar=app.calendar, objects=objects, RequestType=RequestType, response=response
     )

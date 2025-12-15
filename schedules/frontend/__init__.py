@@ -2,7 +2,7 @@ import os
 
 from dotenv import load_dotenv
 
-from schedules.frontend.objects import AppWithCalendar
+from schedules.frontend.app_with_calendar import AppWithCalendar
 from schedules.frontend.pages import pages
 
 load_dotenv()

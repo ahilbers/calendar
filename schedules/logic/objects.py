@@ -4,6 +4,7 @@ import dataclasses
 import datetime as dt
 from enum import StrEnum
 from typing import Self
+import uuid
 
 from schedules.logic.requests import Request
 from schedules.logic.errors import CalendarError, RequestError
@@ -24,7 +25,7 @@ class StrID(str):
         return super().__new__(cls, original_string.lower())
 
     def __repr__(self) -> str:
-        return self.title()
+        return self.lower()
 
 
 @dataclasses.dataclass(frozen=True)
@@ -52,7 +53,14 @@ class Location:
 
 
 @dataclasses.dataclass(frozen=True)
+class DayLocation:
+    start: Location
+    end: Location
+
+
+@dataclasses.dataclass(frozen=True)
 class Person:
+    unique_id: StrID
     last_name: StrID
     first_name: StrID
     home: Location
@@ -64,21 +72,24 @@ class Person:
     def __repr__(self):
         return f"Person({self.last_name}, {self.first_name})"
 
-    @classmethod
-    def from_request(cls, request: Request) -> Self:
-        return cls(
-            last_name=StrID(str(request.payload.get("last_name"))),
-            first_name=StrID(str(request.payload.get("first_name"))),
-            home=Location.from_request(request),
-        )
+    def __eq__(self, other: object) -> bool:
+        try:
+            return self.last_name == other.last_name and self.first_name == other.first_name  # type: ignore
+        except AttributeError:
+            return False
 
     @property
     def display_name_frontend(self) -> str:
         return f"{self.first_name.title()} {self.last_name.title()}"
 
-    @property
-    def unique_id(self) -> int:
-        return hash(self)
+    @classmethod
+    def from_request(cls, request: Request) -> Self:
+        return cls(
+            unique_id=StrID(str(uuid.uuid4())),
+            last_name=StrID(str(request.payload.get("last_name"))),
+            first_name=StrID(str(request.payload.get("first_name"))),
+            home=Location.from_request(request),
+        )
 
 
 @dataclasses.dataclass(frozen=True)
@@ -98,9 +109,3 @@ class Trip:
             start_date=dt.date.strptime(request.payload["start_date"], "%Y-%m-%d"),
             end_date=dt.date.strptime(request.payload["end_date"], "%Y-%m-%d"),
         )
-
-
-@dataclasses.dataclass(frozen=True)
-class DayLocation:
-    start: Location
-    end: Location
