@@ -131,7 +131,7 @@ class FullCalendar:
         self._daily_calendars_to_display: OrderedDict[dt.date, OrderedDict[Person, DayLocation]] | None = None
 
     def _add_person(self, person: Person) -> None:
-        if person in self.calendars.keys():
+        if any(person == existing_person for existing_person in self.calendars.keys()):
             raise CalendarError(f"Person {person} is already in calendar.")
         self.calendars[person] = SinglePersonCalendar(person)
         self._id_to_person[hash(person)] = person

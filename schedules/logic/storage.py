@@ -33,7 +33,7 @@ class PersonDBEntry(Base):
 
     def to_python_class(self) -> Person:
         return Person(
-            unique_id=str(self.id),
+            unique_id=StrID(str(self.id)),
             last_name=StrID(str(self.last_name)),
             first_name=StrID(str(self.first_name)),
             home=Location(country=Country(self.country), city=StrID(str(self.city))),

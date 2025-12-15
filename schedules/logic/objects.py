@@ -60,7 +60,7 @@ class DayLocation:
 
 @dataclasses.dataclass(frozen=True)
 class Person:
-    unique_id: str
+    unique_id: StrID
     last_name: StrID
     first_name: StrID
     home: Location
@@ -72,6 +72,12 @@ class Person:
     def __repr__(self):
         return f"Person({self.last_name}, {self.first_name})"
 
+    def __eq__(self, other: object) -> bool:
+        try:
+            return self.last_name == other.last_name and self.first_name == other.first_name  # type: ignore
+        except AttributeError:
+            return False
+
     @property
     def display_name_frontend(self) -> str:
         return f"{self.first_name.title()} {self.last_name.title()}"
@@ -79,7 +85,7 @@ class Person:
     @classmethod
     def from_request(cls, request: Request) -> Self:
         return cls(
-            unique_id=str(uuid.uuid4()),
+            unique_id=StrID(str(uuid.uuid4())),
             last_name=StrID(str(request.payload.get("last_name"))),
             first_name=StrID(str(request.payload.get("first_name"))),
             home=Location.from_request(request),

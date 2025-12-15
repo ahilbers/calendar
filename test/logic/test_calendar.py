@@ -16,6 +16,7 @@ def sample_home_location() -> Location:
 
 def sample_person() -> Person:
     return Person(
+        unique_id=StrID("test_person_id"),
         last_name=StrID("lastname"),
         first_name=StrID("firstname"),
         home=sample_home_location(),

@@ -23,7 +23,7 @@ def sample_location() -> Location:
 
 def sample_person() -> Person:
     return Person(
-        unique_id="test_person_id",
+        unique_id=StrID("test_person_id"),
         last_name=StrID("lastname"),
         first_name=StrID("firstname"),
         home=sample_location(),
@@ -34,4 +34,4 @@ def test_add_person(database_session: Session):
     person = sample_person()
     add_person_to_database(database_session=database_session, person=person)
     people_read_back = read_all_people_from_database(database_session)
-    assert [people_read_back] == person
+    assert people_read_back == [person]
