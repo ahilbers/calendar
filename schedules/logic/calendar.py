@@ -3,6 +3,7 @@
 import datetime as dt
 import logging
 from typing import Any, OrderedDict
+from sqlalchemy.orm import Session
 
 from schedules.logic.requests import Mapping, Request, RequestType, Response
 from schedules.logic.errors import (
@@ -149,7 +150,9 @@ class FullCalendar:
         self._daily_calendars_to_display = None  # Needs to be recalculated
         logging.info(f"Added {trip} to calendar for {person}.")
 
-    def process_frontend_request(self, request_raw: Mapping[str, Any]) -> Response:
+    def process_frontend_request(
+        self, request_raw: Mapping[str, Any], database_session: Session | None = None
+    ) -> Response:
         """Process request (e.g. POST) from frontend and return string response."""
         logging.info("Processing request %s", request_raw)
         try:
@@ -162,7 +165,7 @@ class FullCalendar:
                 person = Person.from_request(request)
                 self._add_person(person)
                 return Response(code=200, message=f"Added person {person}.")
-            except Exception as err:
+            except CalendarError as err:
                 message = get_message_from_handled_error_else_raise(err)
                 return Response(code=400, message=f"Failed to add person: {message}")
 

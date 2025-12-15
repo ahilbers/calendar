@@ -13,13 +13,15 @@ pages = Blueprint("pages", __name__)
 @pages.route("/", methods=["GET", "POST"])
 def home() -> str:
     app = cast(AppWithCalendar, current_app)
-    session = app.database_session()
     response = Response(code=200, message="Ready")
 
     if flask_request.method == "POST":
-        response = app.calendar.process_frontend_request(flask_request.form.to_dict())
+        database_session = app.database_session()
+        response = app.calendar.process_frontend_request(
+            flask_request.form.to_dict(), database_session=database_session
+        )
+        database_session.close()
 
-    session.close()
     return render_template(
         "home.html", calendar=app.calendar, objects=objects, RequestType=RequestType, response=response
     )
