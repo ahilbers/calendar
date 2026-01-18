@@ -16,11 +16,7 @@ def home() -> str:
     response = Response(code=200, message="Ready")
 
     if flask_request.method == "POST":
-        database_session = app.database_session()
-        response = app.calendar.process_frontend_request(
-            flask_request.form.to_dict(), database_session=database_session
-        )
-        database_session.close()
+        response = app.calendar.process_frontend_request(flask_request.form.to_dict())
 
     return render_template(
         "home.html", calendar=app.calendar, objects=objects, RequestType=RequestType, response=response
