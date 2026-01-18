@@ -124,10 +124,10 @@ class SinglePersonCalendar:
 class FullCalendar:
     """A full calendar, with multiple people and support for interacting with frontend."""
 
-    def __init__(self, repository: "CalendarRepository | None" = None) -> None:
+    def __init__(self, database_repository: "CalendarRepository | None" = None) -> None:
         self.calendars: dict[Person, SinglePersonCalendar] = dict()
         self._id_to_person: dict[str, Person] = dict()
-        self._repository = repository  # Optional, for persistence
+        self._database_repository = database_repository  # Optional, for persistence
         self._people_sorted_cache: list[Person] | None = None
         self._daily_calendars_start_date: dt.date | None = None
         self._daily_calendars_end_date: dt.date | None = None
@@ -139,8 +139,8 @@ class FullCalendar:
         self.calendars[person] = SinglePersonCalendar(person)
         self._id_to_person[str(person.unique_id)] = person
         # Persist to database repository if available
-        if self._repository:
-            self._repository.add_person(person)
+        if self._database_repository:
+            self._database_repository.add_person(person)
 
         self._people_sorted_cache = None  # Needs to be recalculated
         self._daily_calendars_to_display = None  # Needs to be recalculated
@@ -154,11 +154,11 @@ class FullCalendar:
 
     def load_from_repository(self) -> None:
         """Load all people from the repository."""
-        if not self._repository:
+        if not self._database_repository:
             logging.warning("No database repository set. Performing no action.")
             return
 
-        people = self._repository.get_all_people()
+        people = self._database_repository.get_all_people()
         for person in people:
             # Add person without persisting again (no repository call)
             self.calendars[person] = SinglePersonCalendar(person)
