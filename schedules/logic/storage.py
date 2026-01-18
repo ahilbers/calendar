@@ -55,3 +55,25 @@ def add_person_to_database(database_session: Session, person: Person) -> None:
 def read_all_people_from_database(database_session: Session) -> list[Person]:
     person_db_entries = database_session.query(PersonDBEntry).all()
     return [person_db_entry.to_python_class() for person_db_entry in person_db_entries]
+
+
+class CalendarRepository:
+    """Handles all database operations for the calendar."""
+
+    def __init__(self, session: Session):
+        self.session = session
+
+    def add_person(self, person: Person) -> None:
+        """Save a person to the database."""
+        try:
+            person_db_entry = PersonDBEntry.from_python_class(person)
+            self.session.add(person_db_entry)
+            self.session.commit()
+            logging.info(f"Saved {person} to database, id {person_db_entry.id}.")
+        except OperationalError as err:
+            raise CalendarError(message=f"Failed to add person to database: {err}") from err
+
+    def get_all_people(self) -> list[Person]:
+        """Load all people from the database."""
+        person_db_entries = self.session.query(PersonDBEntry).all()
+        return [entry.to_python_class() for entry in person_db_entries]
