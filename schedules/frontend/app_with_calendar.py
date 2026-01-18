@@ -5,6 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from schedules.logic.calendar import FullCalendar
+from schedules.logic.storage import Base
 
 
 class AppWithCalendar(Flask):
@@ -13,4 +14,6 @@ class AppWithCalendar(Flask):
     def __init__(self, import_name: str):
         super().__init__(import_name)
         self.calendar = FullCalendar()
-        self.database_session = sessionmaker(bind=create_engine("sqlite:///data/test.db"))
+        database_engine = create_engine("sqlite:///data/database.db")
+        Base.metadata.create_all(database_engine)
+        self.database_session = sessionmaker(bind=database_engine)

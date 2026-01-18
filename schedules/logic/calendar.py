@@ -13,6 +13,7 @@ from schedules.logic.errors import (
     get_message_from_handled_error_else_raise,
 )
 from schedules.logic.objects import DayLocation, Location, Person, Trip
+from schedules.logic.storage import add_person_to_database
 
 
 class SinglePersonCalendar:
@@ -163,6 +164,8 @@ class FullCalendar:
         if request.request_type == RequestType.ADD_PERSON:
             try:
                 person = Person.from_request(request)
+                if database_session is not None:
+                    add_person_to_database(database_session=database_session, person=person)
                 self._add_person(person)
                 return Response(code=200, message=f"Added person {person}.")
             except CalendarError as err:
