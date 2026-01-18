@@ -2,8 +2,7 @@
 
 import datetime as dt
 import logging
-from typing import Any, OrderedDict
-from sqlalchemy.orm import Session
+from typing import Any, OrderedDict, TYPE_CHECKING
 
 from schedules.logic.requests import Mapping, Request, RequestType, Response
 from schedules.logic.errors import (
@@ -13,7 +12,9 @@ from schedules.logic.errors import (
     get_message_from_handled_error_else_raise,
 )
 from schedules.logic.objects import DayLocation, Location, Person, Trip
-from schedules.logic.storage import add_person_to_database, read_all_people_from_database
+
+if TYPE_CHECKING:
+    from schedules.logic.storage import CalendarRepository
 
 
 class SinglePersonCalendar:
@@ -123,9 +124,10 @@ class SinglePersonCalendar:
 class FullCalendar:
     """A full calendar, with multiple people and support for interacting with frontend."""
 
-    def __init__(self) -> None:
+    def __init__(self, repository: "CalendarRepository | None" = None) -> None:
         self.calendars: dict[Person, SinglePersonCalendar] = dict()
-        self._id_to_person: dict[int, Person] = dict()
+        self._id_to_person: dict[str, Person] = dict()
+        self._repository = repository  # Optional, for persistence
         self._people_sorted_cache: list[Person] | None = None
         self._daily_calendars_start_date: dt.date | None = None
         self._daily_calendars_end_date: dt.date | None = None
@@ -135,7 +137,11 @@ class FullCalendar:
         if any(person == existing_person for existing_person in self.calendars.keys()):
             raise CalendarError(f"Person {person} is already in calendar.")
         self.calendars[person] = SinglePersonCalendar(person)
-        self._id_to_person[hash(person)] = person
+        self._id_to_person[str(person.unique_id)] = person
+        # Persist to database repository if available
+        if self._repository:
+            self._repository.add_person(person)
+
         self._people_sorted_cache = None  # Needs to be recalculated
         self._daily_calendars_to_display = None  # Needs to be recalculated
         logging.info("Added %s to calendar", person)
@@ -146,21 +152,27 @@ class FullCalendar:
         self._daily_calendars_to_display = None
         logging.info("Cleared all people from calendar.")
 
-    def load_people_from_database(self, database_session: Session) -> None:
-        """Load all people from the database into the calendar."""
-        people = read_all_people_from_database(database_session)
+    def load_from_repository(self) -> None:
+        """Load all people from the repository."""
+        if not self._repository:
+            logging.warning("No database repository set. Performing no action.")
+            return
+
+        people = self._repository.get_all_people()
         for person in people:
-            self._add_person(person)
-        logging.info(f"Loaded {len(people)} people from database.")
+            # Add person without persisting again (no repository call)
+            self.calendars[person] = SinglePersonCalendar(person)
+            self._id_to_person[str(person.unique_id)] = person
+
+        self._people_sorted_cache = None
+        logging.info(f"Loaded {len(people)} people from repository.")
 
     def _add_trip(self, person: Person, trip: Trip) -> None:
         self.calendars[person].add_trip(trip)
         self._daily_calendars_to_display = None  # Needs to be recalculated
         logging.info(f"Added {trip} to calendar for {person}.")
 
-    def process_frontend_request(
-        self, request_raw: Mapping[str, Any], database_session: Session | None = None
-    ) -> Response:
+    def process_frontend_request(self, request_raw: Mapping[str, Any]) -> Response:
         """Process request (e.g. POST) from frontend and return string response."""
         logging.info("Processing request %s", request_raw)
         try:
@@ -171,8 +183,6 @@ class FullCalendar:
         if request.request_type == RequestType.ADD_PERSON:
             try:
                 person = Person.from_request(request)
-                if database_session is not None:
-                    add_person_to_database(database_session=database_session, person=person)
                 self._add_person(person)
                 return Response(code=200, message=f"Added person {person}.")
             except CalendarError as err:
@@ -185,7 +195,7 @@ class FullCalendar:
 
         if request.request_type == RequestType.ADD_TRIP:
             try:
-                person = self._id_to_person[int(request.payload["person_id"])]
+                person = self._id_to_person[request.payload["person_id"]]
                 trip = Trip.from_request(request)
                 self._add_trip(person=person, trip=trip)
                 return Response(code=200, message=f"Added {trip} to calendar for {person}.")
