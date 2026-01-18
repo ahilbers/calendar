@@ -42,21 +42,6 @@ class PersonDBEntry(Base):
         )
 
 
-def add_person_to_database(database_session: Session, person: Person) -> None:
-    try:
-        person_db_entry = PersonDBEntry.from_python_class(person)
-        database_session.add(person_db_entry)
-        logging.info(f"Added {person} to database, id {person_db_entry.id}.")
-        database_session.commit()
-    except OperationalError as err:
-        raise CalendarError(message=f"Failed to add person to database: {err}") from err
-
-
-def read_all_people_from_database(database_session: Session) -> list[Person]:
-    person_db_entries = database_session.query(PersonDBEntry).all()
-    return [person_db_entry.to_python_class() for person_db_entry in person_db_entries]
-
-
 class CalendarRepository:
     """Handles all database operations for the calendar."""
 
