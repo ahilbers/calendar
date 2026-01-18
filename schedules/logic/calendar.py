@@ -13,7 +13,7 @@ from schedules.logic.errors import (
     get_message_from_handled_error_else_raise,
 )
 from schedules.logic.objects import DayLocation, Location, Person, Trip
-from schedules.logic.storage import add_person_to_database
+from schedules.logic.storage import add_person_to_database, read_all_people_from_database
 
 
 class SinglePersonCalendar:
@@ -145,6 +145,13 @@ class FullCalendar:
         self._people_sorted_cache = None
         self._daily_calendars_to_display = None
         logging.info("Cleared all people from calendar.")
+
+    def load_people_from_database(self, database_session: Session) -> None:
+        """Load all people from the database into the calendar."""
+        people = read_all_people_from_database(database_session)
+        for person in people:
+            self._add_person(person)
+        logging.info(f"Loaded {len(people)} people from database.")
 
     def _add_trip(self, person: Person, trip: Trip) -> None:
         self.calendars[person].add_trip(trip)
