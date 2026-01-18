@@ -227,7 +227,7 @@ class TestFullCalendar:
         person = list(self.calendar.calendars.keys())[0]
         add_trip_request = {
             "request_type": "ADD_TRIP",
-            "person_id": str(hash(person)),
+            "person_id": str(person.unique_id),
             "country": "NETHERLANDS",
             "city": "Amsterdam",
             "start_date": "2025-11-25",
@@ -282,7 +282,7 @@ class TestFullCalendar:
         self.calendar.process_frontend_request(update_daily_calendars_dates_request)
         add_trip_request = {
             "request_type": "ADD_TRIP",
-            "person_id": str(hash(person)),
+            "person_id": str(person.unique_id),
             "country": "ICELAND",
             "city": "reykjavik",
             "start_date": "2025-12-02",
@@ -329,7 +329,7 @@ class TestFullCalendar:
 
         add_trip_request = {
             "request_type": "ADD_TRIP",
-            "person_id": str(hash(person)),
+            "person_id": str(person.unique_id),
             "country": "UNITED_KINGDOM",
             "city": "london",
             "start_date": "2025-12-02",
