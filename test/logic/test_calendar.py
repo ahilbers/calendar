@@ -215,13 +215,6 @@ class TestFullCalendar:
         assert response.code == 400
         assert "is already in calendar" in response.message
 
-    def test_clear_all_people(self):
-        _ = self.calendar.process_frontend_request(self.add_person_request)
-        assert len(self.calendar.calendars) == 1
-        response = self.calendar.process_frontend_request({REQUEST_TYPE_ID: RequestType.CLEAR_ALL_PEOPLE})
-        assert response.code == 200
-        assert len(self.calendar.calendars) == 0
-
     def test_add_trip(self):
         self.calendar.process_frontend_request(self.add_person_request)
         person = list(self.calendar.calendars.keys())[0]

@@ -15,7 +15,6 @@ class RequestType(StrEnum):
     """Request types (e.g. GET or POST) sent between frontend and backend"""
 
     ADD_PERSON = "ADD_PERSON"
-    CLEAR_ALL_PEOPLE = "CLEAR_ALL_PEOPLE"
     ADD_TRIP = "ADD_TRIP"
     UPDATE_DAILY_CALENDARS_DATES = "UPDATE_DAILY_CALENDARS_DATES"
 

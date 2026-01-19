@@ -146,12 +146,6 @@ class FullCalendar:
         self._daily_calendars_to_display = None  # Needs to be recalculated
         logging.info("Added %s to calendar", person)
 
-    def _clear_all_people(self) -> None:
-        self.calendars = dict()
-        self._people_sorted_cache = None
-        self._daily_calendars_to_display = None
-        logging.info("Cleared all people from calendar.")
-
     def load_from_repository(self) -> None:
         """Load all people from the repository."""
         if not self._database_repository:
@@ -188,10 +182,6 @@ class FullCalendar:
             except CalendarError as err:
                 message = get_message_from_handled_error_else_raise(err)
                 return Response(code=400, message=f"Failed to add person: {message}")
-
-        if request.request_type == RequestType.CLEAR_ALL_PEOPLE:
-            self._clear_all_people()
-            return Response(code=200, message="Cleared all people from calendar.")
 
         if request.request_type == RequestType.ADD_TRIP:
             try:
