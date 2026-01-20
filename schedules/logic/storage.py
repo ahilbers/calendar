@@ -62,3 +62,16 @@ class CalendarRepository:
         """Load all people from the database."""
         person_db_entries = self.session.query(PersonDBEntry).all()
         return [entry.to_python_class() for entry in person_db_entries]
+
+    def remove_person(self, person: Person) -> None:
+        """Remove a person from the database."""
+        try:
+            person_db_entry = self.session.query(PersonDBEntry).filter_by(id=str(person.unique_id)).first()
+            if not person_db_entry:
+                raise CalendarError(message=f"Person with id {person.unique_id} not found in database.")
+            if person_db_entry:
+                self.session.delete(person_db_entry)
+                self.session.commit()
+                logging.info(f"Removed {person} from database, id {person_db_entry.id}.")
+        except OperationalError as err:
+            raise CalendarError(message=f"Failed to remove person from database: {err}") from err

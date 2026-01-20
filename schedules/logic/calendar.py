@@ -152,6 +152,8 @@ class FullCalendar:
         del self._id_to_person[str(person.unique_id)]
         self._people_sorted_cache = None  # Needs to be recalculated
         self._daily_calendars_to_display = None  # Needs to be recalculated
+        if self._database_repository:
+            self._database_repository.remove_person(person)
         logging.info(f"Removed {person} from calendar")
 
     def load_from_repository(self) -> None:
