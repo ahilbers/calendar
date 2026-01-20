@@ -5,7 +5,7 @@ import logging
 from typing import Self
 from sqlalchemy import Column, String
 from sqlalchemy.orm import declarative_base, Session
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import IntegrityError, OperationalError
 
 from schedules.logic.errors import CalendarError
 from schedules.logic.objects import Country, Location, Person, StrID
@@ -55,7 +55,7 @@ class CalendarRepository:
             self.session.add(person_db_entry)
             self.session.commit()
             logging.info(f"Saved {person} to database, id {person_db_entry.id}.")
-        except OperationalError as err:
+        except (OperationalError, IntegrityError) as err:
             raise CalendarError(message=f"Failed to add person to database: {err}") from err
 
     def get_all_people(self) -> list[Person]:
