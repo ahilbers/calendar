@@ -95,7 +95,7 @@ th {
     margin: 6px 0px;
 }
 .form-row label {
-    width: 100px;
+    width: 130px;
     text-align: right;
     margin: 0px 10px;
 }
@@ -112,6 +112,9 @@ th {
 }
 .calendar-members-table th, .calendar-members-table td {
     width: 180px;
+}
+.calendar-members-table th:last-child, .calendar-members-table td:last-child {
+    width: 60px;  /* Last column is usually a button, make its size adjust */
 }
 
 /* daily calendars table */
