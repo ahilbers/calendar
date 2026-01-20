@@ -215,9 +215,34 @@ class TestFullCalendar:
         assert response.code == 400
         assert "is already in calendar" in response.message
 
+    def test_remove_person(self):
+        self.calendar.process_frontend_request(self.add_person_request)
+        assert len(self.calendar.calendars) == 1
+        person = list(self.calendar.calendars.keys())[0]
+
+        remove_person_request = {
+            "request_type": "REMOVE_PERSON",
+            "person_id": str(person.unique_id),
+        }
+        response = self.calendar.process_frontend_request(remove_person_request)
+
+        assert response.code == 200
+        assert len(self.calendar.calendars) == 0
+        assert self.calendar.calendars == {}
+
+    def test_raises_on_removing_nonexistent_person(self):
+        remove_person_request = {
+            "request_type": "REMOVE_PERSON",
+            "person_id": "nonexistent_id",
+        }
+        response = self.calendar.process_frontend_request(remove_person_request)
+        assert response.code == 400
+        assert "Failed to remove person" in response.message
+
     def test_add_trip(self):
         self.calendar.process_frontend_request(self.add_person_request)
         person = list(self.calendar.calendars.keys())[0]
+
         add_trip_request = {
             "request_type": "ADD_TRIP",
             "person_id": str(person.unique_id),
@@ -227,6 +252,7 @@ class TestFullCalendar:
             "end_date": "2025-11-28",
         }
         response = self.calendar.process_frontend_request(add_trip_request)
+
         assert response.code == 200
         trip_list = self.calendar.calendars[person].trip_list
         assert len(trip_list) == 1

@@ -4,6 +4,7 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 
+from schedules.logic.errors import CalendarError
 from schedules.logic.objects import Country, Location, Person, StrID
 from schedules.logic.storage import Base, CalendarRepository
 
@@ -82,5 +83,54 @@ def test_repository_duplicate_person_id(database_session: Session):
     repository.add_person(person)
 
     # Adding same person again should raise an error
-    with pytest.raises(Exception):  # Will be OperationalError or IntegrityError
+    with pytest.raises(CalendarError):
         repository.add_person(person)
+
+
+def test_repository_remove_person(database_session: Session):
+    """Test removing a person from the database."""
+    repository = CalendarRepository(database_session)
+    person = sample_person()
+    repository.add_person(person)
+    assert len(repository.get_all_people()) == 1
+
+    repository.remove_person(person)
+
+    people = repository.get_all_people()
+    assert len(people) == 0
+
+
+def test_repository_remove_nonexistent_person(database_session: Session):
+    """Test that removing a person that doesn't exist raises an error."""
+
+    repository = CalendarRepository(database_session)
+    person = sample_person()
+
+    with pytest.raises(CalendarError):
+        repository.remove_person(person)
+
+
+def test_repository_remove_one_of_multiple(database_session: Session):
+    """Test removing one person when multiple people exist."""
+    repository = CalendarRepository(database_session)
+    person1 = Person(
+        unique_id=StrID("person1"),
+        last_name=StrID("lastname"),
+        first_name=StrID("firstname"),
+        home=sample_location(),
+    )
+    person2 = Person(
+        unique_id=StrID("person2"),
+        last_name=StrID("familyname"),
+        first_name=StrID("givenname"),
+        home=sample_location(),
+    )
+    repository.add_person(person1)
+    repository.add_person(person2)
+    assert len(repository.get_all_people()) == 2
+
+    repository.remove_person(person1)
+
+    people = repository.get_all_people()
+    assert len(people) == 1
+    assert people[0] == person2
