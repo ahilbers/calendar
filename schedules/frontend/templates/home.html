@@ -23,13 +23,28 @@
                 <div class="body-widget-element">    
                     <table class="calendar-members-table">
                         <thead>
-                            <tr> <th>Name</th> <th>Home</th> </tr>
+                            <tr> <th>Name</th> <th>Home</th> <th></th> </tr>
                         </thead>
                         <tbody>
                             {% for single_person_calendar in calendar.single_person_calendars %}
                                 <tr>
                                     <td> {{ single_person_calendar.person.display_name_frontend }} </td>
                                     <td> {{ single_person_calendar.person.home.display_name_frontend }} </td>
+                                    <td>
+                                        <form method="post" style="margin: 0;">
+                                            <input
+                                                type="hidden"
+                                                name="request_type"
+                                                value="{{ RequestType.REMOVE_PERSON }}"
+                                            >
+                                            <input 
+                                                type="hidden"
+                                                name="person_id"
+                                                value="{{ single_person_calendar.person.unique_id }}"
+                                            >
+                                            <button type="submit" class="remove-button">Remove</button>
+                                        </form>
+                                    </td>
                                 </tr>
                             {% endfor %}
                         </tbody>
