@@ -215,6 +215,28 @@ class TestFullCalendar:
         assert response.code == 400
         assert "is already in calendar" in response.message
 
+    def test_remove_person(self):
+        # Add a person first
+        self.calendar.process_frontend_request(self.add_person_request)
+        assert len(self.calendar.calendars) == 1
+        person = list(self.calendar.calendars.keys())[0]
+        
+        # Remove the person
+        self.calendar._remove_person(person)
+        
+        # Verify person is removed
+        assert len(self.calendar.calendars) == 0
+        assert str(person.unique_id) not in self.calendar._id_to_person
+
+    def test_raises_on_removing_nonexistent_person(self):
+        # Try to remove a person that doesn't exist
+        person = sample_person()
+        
+        with pytest.raises(CalendarError) as exc_info:
+            self.calendar._remove_person(person)
+        
+        assert "is not in calendar" in str(exc_info.value)
+
     def test_add_trip(self):
         self.calendar.process_frontend_request(self.add_person_request)
         person = list(self.calendar.calendars.keys())[0]

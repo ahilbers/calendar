@@ -138,13 +138,21 @@ class FullCalendar:
             raise CalendarError(f"Person {person} is already in calendar.")
         self.calendars[person] = SinglePersonCalendar(person)
         self._id_to_person[str(person.unique_id)] = person
-        # Persist to database repository if available
-        if self._database_repository:
-            self._database_repository.add_person(person)
-
         self._people_sorted_cache = None  # Needs to be recalculated
         self._daily_calendars_to_display = None  # Needs to be recalculated
+        if self._database_repository:
+            self._database_repository.add_person(person)
         logging.info("Added %s to calendar", person)
+
+    def _remove_person(self, person: Person) -> None:
+        """Remove a person from the calendar and database."""
+        if person not in self.calendars:
+            raise CalendarError(f"Person {person} is not in calendar.")
+        del self.calendars[person]
+        del self._id_to_person[str(person.unique_id)]
+        self._people_sorted_cache = None  # Needs to be recalculated
+        self._daily_calendars_to_display = None  # Needs to be recalculated
+        logging.info(f"Removed {person} from calendar")
 
     def load_from_repository(self) -> None:
         """Load all people from the repository."""
@@ -182,6 +190,15 @@ class FullCalendar:
             except CalendarError as err:
                 message = get_message_from_handled_error_else_raise(err)
                 return Response(code=400, message=f"Failed to add person: {message}")
+
+        if request.request_type == RequestType.REMOVE_PERSON:
+            try:
+                person = self._id_to_person[request.payload["person_id"]]
+                self._remove_person(person)
+                return Response(code=200, message=f"Removed person {person}.")
+            except (CalendarBaseException, KeyError) as err:
+                message = get_message_from_handled_error_else_raise(err)
+                return Response(code=400, message=f"Failed to remove person: {message}")
 
         if request.request_type == RequestType.ADD_TRIP:
             try:
