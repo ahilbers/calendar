@@ -216,30 +216,33 @@ class TestFullCalendar:
         assert "is already in calendar" in response.message
 
     def test_remove_person(self):
-        # Add a person first
         self.calendar.process_frontend_request(self.add_person_request)
         assert len(self.calendar.calendars) == 1
         person = list(self.calendar.calendars.keys())[0]
-        
-        # Remove the person
-        self.calendar._remove_person(person)
-        
-        # Verify person is removed
+
+        remove_person_request = {
+            "request_type": "REMOVE_PERSON",
+            "person_id": str(person.unique_id),
+        }
+        response = self.calendar.process_frontend_request(remove_person_request)
+
+        assert response.code == 200
         assert len(self.calendar.calendars) == 0
-        assert str(person.unique_id) not in self.calendar._id_to_person
+        assert self.calendar.calendars == {}
 
     def test_raises_on_removing_nonexistent_person(self):
-        # Try to remove a person that doesn't exist
-        person = sample_person()
-        
-        with pytest.raises(CalendarError) as exc_info:
-            self.calendar._remove_person(person)
-        
-        assert "is not in calendar" in str(exc_info.value)
+        remove_person_request = {
+            "request_type": "REMOVE_PERSON",
+            "person_id": "nonexistent_id",
+        }
+        response = self.calendar.process_frontend_request(remove_person_request)
+        assert response.code == 400
+        assert "Failed to remove person" in response.message
 
     def test_add_trip(self):
         self.calendar.process_frontend_request(self.add_person_request)
         person = list(self.calendar.calendars.keys())[0]
+
         add_trip_request = {
             "request_type": "ADD_TRIP",
             "person_id": str(person.unique_id),
@@ -249,6 +252,7 @@ class TestFullCalendar:
             "end_date": "2025-11-28",
         }
         response = self.calendar.process_frontend_request(add_trip_request)
+
         assert response.code == 200
         trip_list = self.calendar.calendars[person].trip_list
         assert len(trip_list) == 1
