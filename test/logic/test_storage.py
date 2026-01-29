@@ -50,7 +50,7 @@ def test_add_person(database_session: Session):
     assert people_read_back[0] == person
 
 
-def test_repository_multiple_people(database_session: Session):
+def test_multiple_people(database_session: Session):
     """Test adding and retrieving multiple people."""
     person1 = Person(
         unique_id=StrID("person1"),
@@ -75,7 +75,7 @@ def test_repository_multiple_people(database_session: Session):
     assert person2 in people
 
 
-def test_repository_duplicate_person_id(database_session: Session):
+def test_duplicate_person_id(database_session: Session):
     """Test that adding person with same ID raises error."""
     repository = CalendarRepository(database_session)
     person = sample_person()
@@ -87,7 +87,7 @@ def test_repository_duplicate_person_id(database_session: Session):
         repository.add_person(person)
 
 
-def test_repository_remove_person(database_session: Session):
+def test_remove_person(database_session: Session):
     """Test removing a person from the database."""
     repository = CalendarRepository(database_session)
     person = sample_person()
@@ -100,7 +100,7 @@ def test_repository_remove_person(database_session: Session):
     assert len(people) == 0
 
 
-def test_repository_remove_nonexistent_person(database_session: Session):
+def test_remove_nonexistent_person(database_session: Session):
     """Test that removing a person that doesn't exist raises an error."""
 
     repository = CalendarRepository(database_session)
@@ -110,7 +110,7 @@ def test_repository_remove_nonexistent_person(database_session: Session):
         repository.remove_person(person)
 
 
-def test_repository_remove_one_of_multiple(database_session: Session):
+def test_remove_one_of_multiple(database_session: Session):
     """Test removing one person when multiple people exist."""
     repository = CalendarRepository(database_session)
     person1 = Person(
