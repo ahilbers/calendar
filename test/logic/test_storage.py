@@ -157,3 +157,105 @@ class TestStorageTrip:
 
         assert len(trips) == 1
         assert trips[0] == trip
+
+    def test_multiple_trips(self, database_session: Session):
+        """Test adding and retrieving multiple trips for a person."""
+        repository = CalendarRepository(database_session)
+        person = sample_person()
+        repository.add_person(person)
+        trip1 = Trip(
+            unique_id=StrID("trip1"),
+            location=Location(country=Country.AUSTRIA, city=StrID("Vienna")),
+            start_date=datetime.date(2025, 8, 5),
+            end_date=datetime.date(2025, 8, 9),
+        )
+        trip2 = Trip(
+            unique_id=StrID("trip2"),
+            location=Location(country=Country.SWITZERLAND, city=StrID("Zurich")),
+            start_date=datetime.date(2025, 9, 10),
+            end_date=datetime.date(2025, 9, 15),
+        )
+
+        repository.add_trip(person, trip1)
+        repository.add_trip(person, trip2)
+
+        trips = repository.get_trips_for_person(person)
+        assert len(trips) == 2
+        assert trip1 in trips
+        assert trip2 in trips
+
+    def test_duplicate_trip_id(self, database_session: Session):
+        """Test that adding trip with same ID raises error."""
+        repository = CalendarRepository(database_session)
+        person = sample_person()
+        repository.add_person(person)
+        trip = sample_trip()
+
+        repository.add_trip(person, trip)
+
+        # Adding same trip again should raise an error
+        with pytest.raises(CalendarError):
+            repository.add_trip(person, trip)
+
+    def test_remove_trip(self, database_session: Session):
+        """Test removing a trip from the database."""
+        repository = CalendarRepository(database_session)
+        person = sample_person()
+        repository.add_person(person)
+        trip = sample_trip()
+        repository.add_trip(person, trip)
+        assert len(repository.get_trips_for_person(person)) == 1
+
+        repository.remove_trip(trip)
+
+        trips = repository.get_trips_for_person(person)
+        assert len(trips) == 0
+
+    def test_remove_nonexistent_trip(self, database_session: Session):
+        """Test that removing a trip that doesn't exist raises an error."""
+        repository = CalendarRepository(database_session)
+        trip = sample_trip()
+
+        with pytest.raises(CalendarError):
+            repository.remove_trip(trip)
+
+    def test_remove_one_of_multiple(self, database_session: Session):
+        """Test removing one trip when multiple trips exist."""
+        repository = CalendarRepository(database_session)
+        person = sample_person()
+        repository.add_person(person)
+        trip1 = Trip(
+            unique_id=StrID("trip1"),
+            location=Location(country=Country.AUSTRIA, city=StrID("Vienna")),
+            start_date=datetime.date(2025, 8, 5),
+            end_date=datetime.date(2025, 8, 9),
+        )
+        trip2 = Trip(
+            unique_id=StrID("trip2"),
+            location=Location(country=Country.SWITZERLAND, city=StrID("Zurich")),
+            start_date=datetime.date(2025, 9, 10),
+            end_date=datetime.date(2025, 9, 15),
+        )
+
+        repository.add_trip(person, trip1)
+        repository.add_trip(person, trip2)
+        assert len(repository.get_trips_for_person(person)) == 2
+        repository.remove_trip(trip1)
+
+        trips = repository.get_trips_for_person(person)
+        assert len(trips) == 1
+        assert trips[0] == trip2
+
+    def test_get_trips_for_nonexistent_person(self, database_session: Session):
+        """Test getting trips for a person that doesn't exist returns empty list."""
+        repository = CalendarRepository(database_session)
+        person = Person(
+            unique_id=StrID("nonexistent_person"),
+            last_name=StrID("lastname"),
+            first_name=StrID("firstname"),
+            home=sample_location(),
+        )
+
+        trips = repository.get_trips_for_person(person)
+
+        assert trips == []
