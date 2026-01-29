@@ -59,8 +59,8 @@ class TripDBEntry(Base):
         return cls(
             id=str(trip.unique_id),
             person_id=str(person.unique_id),
-            location_country=trip.location.country,
-            location_city=trip.location.city,
+            country=trip.location.country,
+            city=trip.location.city,
             start_date=int(trip.start_date.strftime("%Y%m%d")),
             end_date=int(trip.end_date.strftime("%Y%m%d")),
         )

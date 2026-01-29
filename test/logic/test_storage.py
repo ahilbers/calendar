@@ -1,11 +1,13 @@
 """Test interactions with persistent storage, such as a database."""
 
+import datetime
+
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 
 from schedules.logic.errors import CalendarError
-from schedules.logic.objects import Country, Location, Person, StrID
+from schedules.logic.objects import Country, Location, Person, StrID, Trip
 from schedules.logic.storage import Base, CalendarRepository
 
 
@@ -28,6 +30,15 @@ def sample_person() -> Person:
         last_name=StrID("lastname"),
         first_name=StrID("firstname"),
         home=sample_location(),
+    )
+
+
+def sample_trip() -> Trip:
+    return Trip(
+        unique_id=StrID("test_trip_id"),
+        location=Location(country=Country.AUSTRIA, city=StrID("Sankt-Anton")),
+        start_date=datetime.date(2025, 8, 5),
+        end_date=datetime.date(2025, 8, 9),
     )
 
 
@@ -131,3 +142,18 @@ class TestStoragePerson:
         people = repository.get_all_people()
         assert len(people) == 1
         assert people[0] == person2
+
+
+class TestStorageTrip:
+    def test_add_trip(self, database_session: Session):
+        """Test adding and retrieving a trip for a person."""
+        repository = CalendarRepository(database_session)
+        person = sample_person()
+        repository.add_person(person)
+        trip = sample_trip()
+
+        repository.add_trip(person, trip)
+        trips = repository.get_trips_for_person(person)
+
+        assert len(trips) == 1
+        assert trips[0] == trip

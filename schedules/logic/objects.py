@@ -11,6 +11,7 @@ from schedules.logic.errors import CalendarError, RequestError
 
 
 class Country(StrEnum):
+    AUSTRIA = "AUT"
     ICELAND = "ISL"
     NETHERLANDS = "NLD"
     NORWAY = "NOR"
@@ -19,10 +20,10 @@ class Country(StrEnum):
 
 
 class StrID(str):
-    """A string, but always lowercase for good comparisons."""
+    """A string, but always lowercase and with no spaces for good comparisons."""
 
     def __new__(cls, original_string: str) -> Self:
-        return super().__new__(cls, original_string.lower())
+        return super().__new__(cls, original_string.lower().replace(" ", "-"))
 
     def __repr__(self) -> str:
         return self.lower()
