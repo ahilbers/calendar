@@ -94,6 +94,7 @@ class Person:
 
 @dataclasses.dataclass(frozen=True)
 class Trip:
+    unique_id: StrID
     location: Location
     start_date: dt.date
     end_date: dt.date
@@ -105,6 +106,7 @@ class Trip:
     @classmethod
     def from_request(cls, request: Request) -> Self:
         return cls(
+            unique_id=StrID(str(uuid.uuid4())),
             location=Location.from_request(request),
             start_date=dt.date.strptime(request.payload["start_date"], "%Y-%m-%d"),
             end_date=dt.date.strptime(request.payload["end_date"], "%Y-%m-%d"),
