@@ -55,10 +55,10 @@ class TripDBEntry(Base):
     end_date = Column(Integer, nullable=False)
 
     @classmethod
-    def from_python(cls, person_id: StrID, trip: Trip) -> Self:
+    def from_python(cls, person: Person, trip: Trip) -> Self:
         return cls(
             id=str(trip.unique_id),
-            person_id=str(person_id),
+            person_id=str(person.unique_id),
             location_country=trip.location.country,
             location_city=trip.location.city,
             start_date=int(trip.start_date.strftime("%Y%m%d")),
@@ -107,3 +107,30 @@ class CalendarRepository:
                 logging.info(f"Removed {person} from database, id {person_db_entry.id}.")
         except OperationalError as err:
             raise CalendarError(message=f"Failed to remove person from database: {err}") from err
+
+    def add_trip(self, person: Person, trip: Trip) -> None:
+        """Save a trip for a person to the database."""
+        try:
+            trip_db_entry = TripDBEntry.from_python(person, trip)
+            self.session.add(trip_db_entry)
+            self.session.commit()
+            logging.info(f"Saved trip {trip}, id {trip.unique_id} for person {person} to database.")
+        except (OperationalError, IntegrityError) as err:
+            raise CalendarError(message=f"Failed to add trip to database: {err}") from err
+
+    def get_trips_for_person(self, person: Person) -> list[Trip]:
+        """Load all trips for a specific person from the database."""
+        trip_db_entries = self.session.query(TripDBEntry).filter_by(person_id=str(person.unique_id)).all()
+        return [entry.to_python() for entry in trip_db_entries]
+
+    def remove_trip(self, trip: Trip) -> None:
+        """Remove a trip from the database."""
+        try:
+            trip_db_entry = self.session.query(TripDBEntry).filter_by(id=str(trip.unique_id)).first()
+            if not trip_db_entry:
+                raise CalendarError(message=f"Trip with id {trip.unique_id} not found in database.")
+            self.session.delete(trip_db_entry)
+            self.session.commit()
+            logging.info(f"Removed trip {trip.unique_id} from database.")
+        except OperationalError as err:
+            raise CalendarError(message=f"Failed to remove trip from database: {err}") from err
