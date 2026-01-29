@@ -162,18 +162,28 @@ class FullCalendar:
             logging.warning("No database repository set. Performing no action.")
             return
 
+        # Load people from database
         people = self._database_repository.get_all_people()
         for person in people:
             # Add person without persisting again (no repository call)
             self.calendars[person] = SinglePersonCalendar(person)
             self._id_to_person[str(person.unique_id)] = person
 
-        self._people_sorted_cache = None
+        # Load trips for each person from database
+        for person in people:
+            trips = self._database_repository.get_trips_for_person(person)
+            for trip in trips:
+                self.calendars[person].add_trip(trip)
+
+        self._people_sorted_cache = None  # Needs to be recalculated
+        self._daily_calendars_to_display = None  # Needs to be recalculated
         logging.info(f"Loaded {len(people)} people from repository.")
 
     def _add_trip(self, person: Person, trip: Trip) -> None:
         self.calendars[person].add_trip(trip)
         self._daily_calendars_to_display = None  # Needs to be recalculated
+        if self._database_repository:
+            self._database_repository.add_trip(person, trip)
         logging.info(f"Added {trip} to calendar for {person}.")
 
     def process_frontend_request(self, request_raw: Mapping[str, Any]) -> Response:

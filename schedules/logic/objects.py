@@ -11,6 +11,7 @@ from schedules.logic.errors import CalendarError, RequestError
 
 
 class Country(StrEnum):
+    AUSTRIA = "AUT"
     ICELAND = "ISL"
     NETHERLANDS = "NLD"
     NORWAY = "NOR"
@@ -19,10 +20,10 @@ class Country(StrEnum):
 
 
 class StrID(str):
-    """A string, but always lowercase for good comparisons."""
+    """A string, but always lowercase and with no spaces for good comparisons."""
 
     def __new__(cls, original_string: str) -> Self:
-        return super().__new__(cls, original_string.lower())
+        return super().__new__(cls, original_string.lower().replace(" ", "-"))
 
     def __repr__(self) -> str:
         return self.lower()
@@ -94,6 +95,7 @@ class Person:
 
 @dataclasses.dataclass(frozen=True)
 class Trip:
+    unique_id: StrID
     location: Location
     start_date: dt.date
     end_date: dt.date
@@ -105,6 +107,7 @@ class Trip:
     @classmethod
     def from_request(cls, request: Request) -> Self:
         return cls(
+            unique_id=StrID(str(uuid.uuid4())),
             location=Location.from_request(request),
             start_date=dt.date.strptime(request.payload["start_date"], "%Y-%m-%d"),
             end_date=dt.date.strptime(request.payload["end_date"], "%Y-%m-%d"),

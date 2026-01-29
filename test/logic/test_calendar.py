@@ -1,5 +1,6 @@
 import datetime as dt
 from typing import Any
+from uuid import uuid4
 
 import pytest
 
@@ -33,49 +34,114 @@ class TestSinglePersonCalendar:
         assert not self.calendar.trip_list
 
     def test_single_trip(self):
-        trip = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 24))
+        trip = Trip(
+            StrID(str(uuid4())),
+            Location(Country.SWITZERLAND, StrID("Zurich")),
+            dt.date(2024, 6, 23),
+            dt.date(2024, 6, 24),
+        )
         self.calendar.add_trip(trip)
         assert self.calendar.trip_list == [trip]
 
     def test_trips_returned_ordered(self):
-        trip_later = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 25), dt.date(2024, 6, 26))
-        trip_earlier = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 24))
+        trip_later = Trip(
+            StrID(str(uuid4())),
+            Location(Country.SWITZERLAND, StrID("Zurich")),
+            dt.date(2024, 6, 25),
+            dt.date(2024, 6, 26),
+        )
+        trip_earlier = Trip(
+            StrID(str(uuid4())),
+            Location(Country.SWITZERLAND, StrID("Zurich")),
+            dt.date(2024, 6, 23),
+            dt.date(2024, 6, 24),
+        )
         self.calendar.add_trip(trip_later)
         self.calendar.add_trip(trip_earlier)
         assert self.calendar.trip_list == [trip_earlier, trip_later]
 
     def test_raises_if_same_start_date(self, caplog: pytest.LogCaptureFixture):
-        trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 24))
-        trip_2 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 25))
+        trip_1 = Trip(
+            StrID(str(uuid4())),
+            Location(Country.SWITZERLAND, StrID("Zurich")),
+            dt.date(2024, 6, 23),
+            dt.date(2024, 6, 24),
+        )
+        trip_2 = Trip(
+            StrID(str(uuid4())),
+            Location(Country.SWITZERLAND, StrID("Zurich")),
+            dt.date(2024, 6, 23),
+            dt.date(2024, 6, 25),
+        )
         self.calendar.add_trip(trip_1)
         with pytest.raises(CalendarError):
             self.calendar.add_trip(trip_2)
 
     def test_raises_if_same_end_date(self, caplog: pytest.LogCaptureFixture):
-        trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 24))
-        trip_2 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 22), dt.date(2024, 6, 24))
+        trip_1 = Trip(
+            StrID(str(uuid4())),
+            Location(Country.SWITZERLAND, StrID("Zurich")),
+            dt.date(2024, 6, 23),
+            dt.date(2024, 6, 24),
+        )
+        trip_2 = Trip(
+            StrID(str(uuid4())),
+            Location(Country.SWITZERLAND, StrID("Zurich")),
+            dt.date(2024, 6, 22),
+            dt.date(2024, 6, 24),
+        )
         self.calendar.add_trip(trip_1)
         with pytest.raises(CalendarError):
             self.calendar.add_trip(trip_2)
 
     def test_raises_if_overlapping_and_starting_earlier(self, caplog: pytest.LogCaptureFixture):
-        trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 25))
-        trip_2 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 22), dt.date(2024, 6, 24))
+        trip_1 = Trip(
+            StrID(str(uuid4())),
+            Location(Country.SWITZERLAND, StrID("Zurich")),
+            dt.date(2024, 6, 23),
+            dt.date(2024, 6, 25),
+        )
+        trip_2 = Trip(
+            StrID(str(uuid4())),
+            Location(Country.SWITZERLAND, StrID("Zurich")),
+            dt.date(2024, 6, 22),
+            dt.date(2024, 6, 24),
+        )
         self.calendar.add_trip(trip_1)
         with pytest.raises(CalendarError):
             self.calendar.add_trip(trip_2)
 
     def test_raises_if_overlapping_and_starting_later(self, caplog: pytest.LogCaptureFixture):
-        trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 25))
-        trip_2 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 24), dt.date(2024, 6, 26))
+        trip_1 = Trip(
+            StrID(str(uuid4())),
+            Location(Country.SWITZERLAND, StrID("Zurich")),
+            dt.date(2024, 6, 23),
+            dt.date(2024, 6, 25),
+        )
+        trip_2 = Trip(
+            StrID(str(uuid4())),
+            Location(Country.SWITZERLAND, StrID("Zurich")),
+            dt.date(2024, 6, 24),
+            dt.date(2024, 6, 26),
+        )
         self.calendar.add_trip(trip_1)
         with pytest.raises(CalendarError):
             self.calendar.add_trip(trip_2)
 
     def test_trip_fully_contained(self):
         """A trip that is fully contained in another should be added without issues."""
-        trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 22), dt.date(2024, 6, 25))
-        trip_2 = Trip(Location(Country.UNITED_KINGDOM, StrID("London")), dt.date(2024, 6, 23), dt.date(2024, 6, 24))
+        trip_1 = Trip(
+            StrID(str(uuid4())),
+            Location(Country.SWITZERLAND, StrID("Zurich")),
+            dt.date(2024, 6, 22),
+            dt.date(2024, 6, 25),
+        )
+        trip_2 = Trip(
+            StrID(str(uuid4())),
+            Location(Country.UNITED_KINGDOM, StrID("London")),
+            dt.date(2024, 6, 23),
+            dt.date(2024, 6, 24),
+        )
         self.calendar.add_trip(trip_1)
         self.calendar.add_trip(trip_2)
         assert self.calendar.trip_list == [trip_1, trip_2]
@@ -102,7 +168,12 @@ class TestDailyCalendar:
     def test_single_trip(self):
         """A single trip inside the calendar should be calculated properly."""
 
-        trip = Trip(Location(Country.NETHERLANDS, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 25))
+        trip = Trip(
+            StrID(str(uuid4())),
+            Location(Country.NETHERLANDS, StrID("Zurich")),
+            dt.date(2024, 6, 23),
+            dt.date(2024, 6, 25),
+        )
         self.calendar.add_trip(trip)
 
         daily_calendar_actual = self.calendar.get_daily_calendar(dt.date(2024, 6, 22), dt.date(2024, 6, 26))
@@ -117,8 +188,18 @@ class TestDailyCalendar:
         assert daily_calendar_actual == daily_calendar_expected
 
     def test_trips_disjoint(self):
-        trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 25))
-        trip_2 = Trip(Location(Country.UNITED_KINGDOM, StrID("London")), dt.date(2024, 6, 27), dt.date(2024, 6, 29))
+        trip_1 = Trip(
+            StrID(str(uuid4())),
+            Location(Country.SWITZERLAND, StrID("Zurich")),
+            dt.date(2024, 6, 23),
+            dt.date(2024, 6, 25),
+        )
+        trip_2 = Trip(
+            StrID(str(uuid4())),
+            Location(Country.UNITED_KINGDOM, StrID("London")),
+            dt.date(2024, 6, 27),
+            dt.date(2024, 6, 29),
+        )
         self.calendar.add_trip(trip_1)
         self.calendar.add_trip(trip_2)
 
@@ -138,8 +219,18 @@ class TestDailyCalendar:
         assert daily_calendar_actual == daily_calendar_expected
 
     def test_trips_connected(self):
-        trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 23), dt.date(2024, 6, 25))
-        trip_2 = Trip(Location(Country.UNITED_KINGDOM, StrID("London")), dt.date(2024, 6, 25), dt.date(2024, 6, 27))
+        trip_1 = Trip(
+            StrID(str(uuid4())),
+            Location(Country.SWITZERLAND, StrID("Zurich")),
+            dt.date(2024, 6, 23),
+            dt.date(2024, 6, 25),
+        )
+        trip_2 = Trip(
+            StrID(str(uuid4())),
+            Location(Country.UNITED_KINGDOM, StrID("London")),
+            dt.date(2024, 6, 25),
+            dt.date(2024, 6, 27),
+        )
         self.calendar.add_trip(trip_1)
         self.calendar.add_trip(trip_2)
 
@@ -157,8 +248,18 @@ class TestDailyCalendar:
         assert daily_calendar_actual == daily_calendar_expected
 
     def test_trip_fully_contained(self):
-        trip_1 = Trip(Location(Country.SWITZERLAND, StrID("Zurich")), dt.date(2024, 6, 22), dt.date(2024, 6, 28))
-        trip_2 = Trip(Location(Country.UNITED_KINGDOM, StrID("London")), dt.date(2024, 6, 24), dt.date(2024, 6, 26))
+        trip_1 = Trip(
+            StrID(str(uuid4())),
+            Location(Country.SWITZERLAND, StrID("Zurich")),
+            dt.date(2024, 6, 22),
+            dt.date(2024, 6, 28),
+        )
+        trip_2 = Trip(
+            StrID(str(uuid4())),
+            Location(Country.UNITED_KINGDOM, StrID("London")),
+            dt.date(2024, 6, 24),
+            dt.date(2024, 6, 26),
+        )
         self.calendar.add_trip(trip_1)
         self.calendar.add_trip(trip_2)
 
