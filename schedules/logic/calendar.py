@@ -287,3 +287,11 @@ class FullCalendar:
             raise CalendarError(
                 f"Date {date} outside daily calendar range {min(daily_calendars.keys())}-{max(daily_calendars.keys())}."
             )
+
+    def get_trips_to_display(self) -> list[tuple[Person, Trip]]:
+        """Get all trips sorted by person last name, then trip start date."""
+        return [
+            (person, trip)
+            for person in self.people_sorted_by_name
+            for trip in self.calendars[person].trip_list
+        ]
