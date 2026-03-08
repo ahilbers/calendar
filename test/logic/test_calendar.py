@@ -362,6 +362,49 @@ class TestFullCalendar:
         assert trip.start_date == dt.date(2025, 11, 25)
         assert trip.end_date == dt.date(2025, 11, 28)
 
+    def test_remove_trip(self):
+        # Add person and trip
+        self.calendar.process_frontend_request(self.add_person_request)
+        person = list(self.calendar.calendars.keys())[0]
+        
+        add_trip_request = {
+            "request_type": "ADD_TRIP",
+            "person_id": str(person.unique_id),
+            "country": "NETHERLANDS",
+            "city": "Amsterdam",
+            "start_date": "2025-11-25",
+            "end_date": "2025-11-28",
+        }
+        self.calendar.process_frontend_request(add_trip_request)
+        assert len(self.calendar.calendars[person].trip_list) == 1
+        trip = self.calendar.calendars[person].trip_list[0]
+
+        # Remove trip
+        remove_trip_request = {
+            "request_type": "REMOVE_TRIP",
+            "person_id": str(person.unique_id),
+            "trip_id": str(trip.unique_id),
+        }
+        response = self.calendar.process_frontend_request(remove_trip_request)
+
+        assert response.code == 200
+        assert len(self.calendar.calendars[person].trip_list) == 0
+
+    def test_raises_on_removing_nonexistent_trip(self):
+        # Add person but no trip
+        self.calendar.process_frontend_request(self.add_person_request)
+        person = list(self.calendar.calendars.keys())[0]
+
+        remove_trip_request = {
+            "request_type": "REMOVE_TRIP",
+            "person_id": str(person.unique_id),
+            "trip_id": "nonexistent_trip_id",
+        }
+        response = self.calendar.process_frontend_request(remove_trip_request)
+        
+        assert response.code == 400
+        assert "Failed to remove trip" in response.message
+
     def test_get_daily_calendars_home(self):
         person_1_request = self.add_person_request.copy()
         person_2_request: dict[str, Any] = {
