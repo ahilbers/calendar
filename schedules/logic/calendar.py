@@ -11,7 +11,7 @@ from schedules.logic.errors import (
     RequestError,
     get_message_from_handled_error_else_raise,
 )
-from schedules.logic.objects import DayLocation, Location, Person, Trip
+from schedules.logic.objects import DayLocation, Location, Person, StrID, Trip
 
 if TYPE_CHECKING:
     from schedules.logic.storage import CalendarRepository
@@ -54,6 +54,16 @@ class SinglePersonCalendar:
         self._raise_if_invalid_trip(candidate=trip)
         logging.info("Adding trip %s to calendar %s", trip, self)
         self._trips.add(trip)
+
+    def remove_trip(self, trip_id: StrID) -> None:
+        """Remove a trip from this calendar by its unique ID."""
+        try:
+            trip_to_remove = next(trip for trip in self._trips if trip.unique_id == trip_id)
+        except StopIteration:
+            raise CalendarError(f"Trip with id {trip_id} not found in calendar for {self.person}.")
+        self._trips.remove(trip_to_remove)
+        self._trip_list_cache = None  # Clear cache
+        logging.info("Removed trip %s from calendar %s", trip_to_remove, self)
 
     def _get_travel_start_of_trip(self, trip_idx: int) -> DayLocation:
         trip = self.trip_list[trip_idx]
@@ -186,6 +196,25 @@ class FullCalendar:
             self._database_repository.add_trip(person, trip)
         logging.info(f"Added {trip} to calendar for {person}.")
 
+    def _remove_trip(self, person_id: StrID, trip_id: StrID) -> Trip:
+        """Remove a trip from the calendar and database."""
+        person = self._id_to_person.get(str(person_id))
+        if person is None:
+            raise CalendarError(f"Person with id {person_id} not found in calendar.")
+
+        # Find the trip object before removing it (needed for database removal)
+        try:
+            trip_to_remove = next(trip for trip in self.calendars[person].trip_list if trip.unique_id == trip_id)
+        except StopIteration:
+            raise CalendarError(f"Trip with id {trip_id} not found for person {person}.")
+
+        self.calendars[person].remove_trip(trip_id)
+        self._daily_calendars_to_display = None  # Needs to be recalculated
+        if self._database_repository:
+            self._database_repository.remove_trip(trip_to_remove)
+        logging.info(f"Removed {trip_to_remove} from calendar for {person}.")
+        return trip_to_remove
+
     def process_frontend_request(self, request_raw: Mapping[str, Any]) -> Response:
         """Process request (e.g. POST) from frontend and return string response."""
         logging.info("Processing request %s", request_raw)
@@ -221,6 +250,16 @@ class FullCalendar:
             except (CalendarBaseException, KeyError) as err:
                 message = get_message_from_handled_error_else_raise(err)
                 return Response(code=400, message=f"Failed to add trip: {message}")
+
+        if request.request_type == RequestType.REMOVE_TRIP:
+            try:
+                person_id = request.payload["person_id"]
+                trip_id = request.payload["trip_id"]
+                trip = self._remove_trip(person_id, trip_id)
+                return Response(code=200, message=f"Removed trip {trip}.")
+            except (CalendarBaseException, KeyError) as err:
+                message = get_message_from_handled_error_else_raise(err)
+                return Response(code=400, message=f"Failed to remove trip: {message}")
 
         if request.request_type == RequestType.UPDATE_DAILY_CALENDARS_DATES:
             try:
@@ -290,8 +329,4 @@ class FullCalendar:
 
     def get_trips_to_display(self) -> list[tuple[Person, Trip]]:
         """Get all trips sorted by person last name, then trip start date."""
-        return [
-            (person, trip)
-            for person in self.people_sorted_by_name
-            for trip in self.calendars[person].trip_list
-        ]
+        return [(person, trip) for person in self.people_sorted_by_name for trip in self.calendars[person].trip_list]
