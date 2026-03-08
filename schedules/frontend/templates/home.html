@@ -154,6 +154,30 @@
 
         <div class="body-column-2">
 
+            {# trips #}
+            <div class="body-widget-container">
+                <div class="body-widget-header">Trips</div>
+
+                {# table with trips #}
+                <div class="body-widget-element">    
+                    <table class="calendar-members-table">
+                        <thead>
+                            <tr> <th>Name</th> <th>Location</th> <th>Start Date</th> <th>End Date</th> </tr>
+                        </thead>
+                        <tbody>
+                            {% for person, trip in calendar.get_trips_to_display() %}
+                                <tr>
+                                    <td> {{ person.display_name_frontend }} </td>
+                                    <td> {{ trip.location.display_name_frontend }} </td>
+                                    <td> {{ trip.start_date }} </td>
+                                    <td> {{ trip.end_date }} </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             {# calendars #}
             <div class="body-widget-container">
                 <div class="body-widget-header calendars-header">
