@@ -160,9 +160,9 @@
 
                 {# table with trips #}
                 <div class="body-widget-element">    
-                    <table class="calendar-members-table">
+                    <table>
                         <thead>
-                            <tr> <th>Name</th> <th>Location</th> <th>Start Date</th> <th>End Date</th> </tr>
+                            <tr> <th>Name</th> <th>Location</th> <th>Start</th> <th>End</th> </tr>
                         </thead>
                         <tbody>
                             {% for person, trip in calendar.get_trips_to_display() %}
