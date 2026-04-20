@@ -46,8 +46,8 @@ gcloud config set project PROJECT_ID
 
 **Example:**
 ```bash
-gcloud projects create my-calendar-app-2026 --name="Calendar App"
-gcloud config set project my-calendar-app-2026
+gcloud projects create ahilbers-calendar --name="Calendar App"
+gcloud config set project ahilbers-calendar
 ```
 
 ### 1.3 Enable Required APIs
