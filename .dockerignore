@@ -1,0 +1,44 @@
+# Git files
+.git/
+.gitignore
+
+# Python cache and compiled files
+__pycache__/
+*/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local data and secrets
+data/*
+.env
+
+# Python package files
+*.egg-info/
+dist/
+build/
+
+# Testing
+test/
+.pytest_cache/
+.coverage
+
+# Documentation
+README.md
+*.md
