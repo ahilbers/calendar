@@ -139,7 +139,7 @@ When you change your code:
 ```bash
 gcloud run deploy calendar-app \
   --source . \
-  --region us-central1
+  --region europe-west6
 ```
 
 No need to re-specify environment variables - they persist between deployments.
@@ -150,23 +150,23 @@ No need to re-specify environment variables - they persist between deployments.
 
 ### View Deployment Info
 ```bash
-gcloud run services describe calendar-app --region us-central1
+gcloud run services describe calendar-app --region europe-west6
 ```
 
 ### View Logs (Real-time)
 ```bash
-gcloud run services logs tail calendar-app --region us-central1
+gcloud run services logs tail calendar-app --region europe-west6
 ```
 
 ### Delete Deployment
 ```bash
-gcloud run services delete calendar-app --region us-central1
+gcloud run services delete calendar-app --region europe-west6
 ```
 
 ### Update Environment Variables
 ```bash
 gcloud run services update calendar-app \
-  --region us-central1 \
+  --region europe-west6 \
   --update-env-vars FLASK_KEY="new-key"
 ```
 
@@ -183,7 +183,7 @@ gcloud run services update calendar-app \
   - Dockerfile errors
 
 ### App Crashes at Startup
-- View logs: `gcloud run services logs tail calendar-app --region us-central1`
+- View logs: `gcloud run services logs tail calendar-app --region europe-west6`
 - Common issues:
   - Wrong DATABASE_URL format
   - Missing FLASK_KEY
@@ -195,25 +195,9 @@ gcloud run services update calendar-app \
 - Check logs for details
 
 ### Environment Variables Not Working
-- Verify they're set: `gcloud run services describe calendar-app --region us-central1`
+- Verify they're set: `gcloud run services describe calendar-app --region europe-west6`
 - Re-deploy with correct values
 - Check for quotes in connection string
-
----
-
-## Cost Estimation
-
-### Cloud Run (Free Tier: 2M requests/month)
-- **Your usage:** ~100 requests/month → **FREE**
-- After free tier: $0.40 per million requests
-- Always-on small app: ~$5-10/month if you exceed free tier
-
-### Neon PostgreSQL
-- **Free tier:** 0.5GB storage, reasonable compute
-- **Your usage:** ~10MB, minimal compute → **FREE**
-
-### Total Expected Cost
-**$0/month** if you stay within free tiers (very likely for hobby project)
 
 ---
 
