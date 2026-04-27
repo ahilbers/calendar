@@ -292,6 +292,12 @@ class FullCalendar:
         self._daily_calendars_to_display = None  # Needs to be recalculated
         logging.info(f"Updated daily calendar dates: {start_date}, {end_date}.")
 
+    def set_daily_calendars_dates(self, start_date: dt.date, end_date: dt.date) -> None:
+        self._update_daily_calendars_dates(start_date, end_date)
+
+    def get_daily_calendars_dates(self) -> tuple[dt.date | None, dt.date | None]:
+        return (self._daily_calendars_start_date, self._daily_calendars_end_date)
+
     def _update_daily_calendars(self) -> None:
         start_date = self._daily_calendars_start_date
         end_date = self._daily_calendars_end_date
