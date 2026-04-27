@@ -5,8 +5,7 @@ from flask import Flask
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from schedules.logic.calendar import FullCalendar
-from schedules.logic.storage import Base, CalendarRepository
+from schedules.logic.storage import Base
 
 
 class AppWithCalendar(Flask):
@@ -24,12 +23,3 @@ class AppWithCalendar(Flask):
 
         Base.metadata.create_all(database_engine)
         self.database_session_maker = sessionmaker(bind=database_engine)
-
-        # Create repository and calendar
-        session = self.database_session_maker()
-        database_repository = CalendarRepository(session)
-        self.calendar = FullCalendar(database_repository=database_repository)
-
-        # Load existing data
-        self.calendar.load_from_repository()
-        session.close()
