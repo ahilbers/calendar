@@ -1,5 +1,7 @@
 # calendar
 
+![A screenshot from an example website](screenshot.png)
+
 ## Overview
 
 A website to track calendars, as a learning exercise.
@@ -13,4 +15,3 @@ A website to track calendars, as a learning exercise.
 - The entry point is `main.py`. This fires up the app and connects to the database.
 - Structured as a python package in `schedules` directory.
 - Currently hosted on GCP with a Neon DB for the database.
-
